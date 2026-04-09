@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>記憶極限 Memory Limit — 你的記憶力能撐到第幾關？</title>
+<meta name="description" content="記憶極限：格子依序亮起，你能記住多長的序列？挑戰你的大腦極限！">
+<meta name="theme-color" content="#a855f7">
+<link rel="manifest" href="manifest.json">
+
+<!-- OG -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yuchenchen-debug.github.io/memory-limit/">
+<meta property="og:title" content="記憶極限 Memory Limit">
+<meta property="og:description" content="我在記憶極限達到了 Level __！你的記憶力能撐到第幾關？">
+<meta property="og:image" content="https://yuchenchen-debug.github.io/memory-limit/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="記憶極限 Memory Limit">
+<meta name="twitter:description" content="你的記憶力能撐到第幾關？挑戰你的大腦極限！">
+
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XW1MRWJR2G"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-XW1MRWJR2G');</script>
+
+<!-- AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4737693030554043" crossorigin="anonymous"></script>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{background:#0a0a0f;color:#e0e0e0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;user-select:none}
+
+/* ---- screens ---- */
+.screen{display:none;flex-direction:column;align-items:center;width:100%;max-width:420px;padding:0 16px}
+.screen.active{display:flex}
+
+/* ---- start screen ---- */
+#startScreen{justify-content:center;gap:24px;text-align:center;height:100dvh}
+#startScreen h1{font-size:2.4rem;background:linear-gradient(135deg,#a855f7,#6366f1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px}
+#startScreen .sub{font-size:.9rem;color:#888;margin-top:-12px}
+.fake-stats{background:#16162a;border-radius:12px;padding:16px;font-size:.78rem;color:#999;line-height:1.8;text-align:left;width:100%}
+.fake-stats span{color:#a855f7;font-weight:600}
+.btn{background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff;border:none;border-radius:14px;padding:16px 48px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:transform .15s,box-shadow .15s;letter-spacing:1px}
+.btn:active{transform:scale(.95)}
+.btn:hover{box-shadow:0 0 30px #a855f755}
+.btn-sm{padding:10px 24px;font-size:.85rem;border-radius:10px}
+
+/* ---- game screen ---- */
+#gameScreen{justify-content:center;gap:16px;height:100dvh}
+.hud{display:flex;justify-content:space-between;width:100%;font-size:.85rem;color:#aaa}
+.hud .level{font-size:1.6rem;font-weight:800;color:#a855f7}
+.taunt{font-size:.82rem;color:#888;min-height:1.2em;text-align:center;transition:opacity .3s}
+.progress-bar{width:100%;height:4px;background:#1a1a2e;border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#a855f7,#6366f1);transition:width .4s ease;width:0}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%;aspect-ratio:1}
+.tile{background:#12121a;border-radius:14px;cursor:pointer;position:relative;overflow:hidden;transition:transform .1s,background .15s;border:1px solid #1e1e32}
+.tile::after{content:'';position:absolute;inset:0;border-radius:14px;opacity:0;transition:opacity .2s}
+.tile:active{transform:scale(.93)}
+.tile.show{background:#a855f7;box-shadow:0 0 25px #a855f788,0 0 60px #a855f733;border-color:#a855f7}
+.tile.show::after{opacity:1;background:radial-gradient(circle at center,#c084fc55 0%,transparent 70%)}
+.tile.correct{background:#00ff88;box-shadow:0 0 25px #00ff8888;border-color:#00ff88}
+.tile.correct::after{opacity:1;background:radial-gradient(circle at center,#00ff8855 0%,transparent 70%)}
+.tile.wrong{background:#ff2d55;box-shadow:0 0 25px #ff2d5588;border-color:#ff2d55}
+@keyframes tileShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.tile.shake{animation:tileShake .4s ease}
+.tile.pulse{animation:tilePulse .3s ease}
+@keyframes tilePulse{0%{transform:scale(1)}50%{transform:scale(.9)}100%{transform:scale(1)}}
+.status{font-size:.8rem;color:#666;min-height:1em;text-align:center}
+
+/* ---- result screen ---- */
+#resultScreen{justify-content:flex-start;gap:16px;height:100dvh;overflow-y:auto;padding-top:40px;padding-bottom:60px;-webkit-overflow-scrolling:touch}
+.result-rank{font-size:4rem;font-weight:900;text-align:center;line-height:1}
+.result-rank.sss{background:linear-gradient(135deg,#ffd700,#ff6b6b,#a855f7,#00ff88);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:rankGlow 2s infinite alternate}
+.result-rank.ss{background:linear-gradient(135deg,#ffd700,#ff6b6b);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.result-rank.s{color:#ffd700}
+.result-rank.a{color:#a855f7}
+.result-rank.b{color:#6366f1}
+.result-rank.c{color:#3b82f6}
+.result-rank.d{color:#888}
+.result-rank.f{color:#ff2d55}
+@keyframes rankGlow{0%{filter:brightness(1)}100%{filter:brightness(1.3)}}
+.result-level{font-size:1.8rem;font-weight:700;color:#e0e0e0;text-align:center}
+.result-msg{font-size:.95rem;color:#aaa;text-align:center}
+.result-detail{background:#16162a;border-radius:12px;padding:16px;width:100%;font-size:.82rem;color:#999;line-height:2}
+.result-detail strong{color:#e0e0e0}
+.result-age{background:#1a1a2e;border-radius:12px;padding:14px;text-align:center;width:100%;font-size:.9rem;color:#ccc}
+.result-age em{color:#a855f7;font-style:normal;font-weight:700;font-size:1.1rem}
+.result-percentile{text-align:center;font-size:.82rem;color:#888}
+.share-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;width:100%}
+.share-btn{padding:10px 16px;border-radius:10px;border:none;font-size:.78rem;font-weight:600;cursor:pointer;color:#fff;transition:transform .1s}
+.share-btn:active{transform:scale(.93)}
+.share-line{background:#06C755}
+.share-x{background:#1d9bf0}
+.share-copy{background:#444}
+.share-ig{background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)}
+.share-dl{background:#333}
+.pb-badge{background:#ffd70022;border:1px solid #ffd70066;border-radius:8px;padding:8px 16px;color:#ffd700;font-size:.82rem;text-align:center;width:100%}
+.bottom-btns{display:flex;gap:10px;width:100%;justify-content:center;margin-top:8px}
+
+/* ---- leaderboard modal ---- */
+.modal-overlay{display:none;position:fixed;inset:0;background:#000a;z-index:100;align-items:center;justify-content:center}
+.modal-overlay.active{display:flex}
+.modal{background:#12121a;border-radius:16px;padding:24px;width:90%;max-width:400px;max-height:80vh;overflow-y:auto}
+.modal h2{text-align:center;margin-bottom:16px;color:#a855f7}
+.modal .close{float:right;background:none;border:none;color:#888;font-size:1.4rem;cursor:pointer}
+.lb-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1e1e32;font-size:.82rem}
+.lb-row .lb-rank{color:#a855f7;font-weight:700;width:28px}
+.lb-row .lb-name{flex:1;color:#ccc}
+.lb-row .lb-score{color:#ffd700;font-weight:600}
+
+/* ---- ad slot ---- */
+.ad-slot{width:100%;max-width:400px;min-height:50px;margin:8px 0;text-align:center;overflow:hidden}
+
+/* ---- canvas (hidden) ---- */
+#shareCanvas{display:none}
+</style>
+</head>
+<body>
+
+<!-- START SCREEN -->
+<div id="startScreen" class="screen active">
+  <h1>🧠 記憶極限</h1>
+  <div class="sub">Memory Limit Challenge</div>
+  <div class="fake-stats">
+    📊 累計 <span id="fakeTotal">1,923,847</span> 人挑戰<br>
+    🧠 一般人類平均: <span>Level 7</span><br>
+    🏆 世界紀錄: <span>Level 31</span> (🇮🇳 MemoryGod)<br>
+    🔥 只有 <span>0.3%</span> 突破 Level 20
+  </div>
+  <button class="btn" onclick="startGame()">開始挑戰</button>
+  <div style="display:flex;gap:10px">
+    <button class="btn btn-sm" style="background:#16162a" onclick="showLeaderboard()">🏆 排行榜</button>
+    <button class="btn btn-sm" style="background:#16162a" onclick="showPB()">📈 個人紀錄</button>
+  </div>
+  <div class="ad-slot"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4737693030554043" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="gameScreen" class="screen">
+  <div class="hud">
+    <div>序列長度</div>
+    <div class="level" id="levelDisplay">2</div>
+    <div>分數: <span id="scoreDisplay">0</span></div>
+  </div>
+  <div class="taunt" id="taunt"></div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="grid" id="grid"></div>
+  <div class="status" id="status">觀察序列...</div>
+</div>
+
+<!-- RESULT SCREEN -->
+<div id="resultScreen" class="screen">
+  <div class="result-rank" id="resultRank">B</div>
+  <div class="result-level">Level <span id="resultLevel">0</span></div>
+  <div class="result-msg" id="resultMsg"></div>
+  <div id="pbBadge" class="pb-badge" style="display:none">🎉 新紀錄！</div>
+  <div class="result-age" id="resultAge"></div>
+  <div class="result-detail" id="resultDetail"></div>
+  <div class="result-percentile" id="resultPercentile"></div>
+  <div id="nameInput" style="display:flex;gap:8px;width:100%">
+    <input id="playerName" type="text" placeholder="輸入暱稱上傳排行榜" maxlength="16" style="flex:1;padding:10px 14px;border-radius:10px;border:1px solid #333;background:#16162a;color:#fff;font-size:.85rem">
+    <button class="btn btn-sm" onclick="submitScore()">送出</button>
+  </div>
+  <div class="share-row">
+    <button class="share-btn share-line" onclick="shareLINE()">LINE</button>
+    <button class="share-btn share-x" onclick="shareX()">𝕏 Twitter</button>
+    <button class="share-btn share-copy" onclick="shareCopy()">📋 複製</button>
+    <button class="share-btn share-ig" onclick="shareIG()">IG Story</button>
+    <button class="share-btn share-dl" onclick="shareDL()">📥 下載圖片</button>
+  </div>
+  <div class="bottom-btns">
+    <button class="btn" onclick="startGame()">再挑戰一次</button>
+    <button class="btn btn-sm" style="background:#16162a" onclick="showLeaderboard()">🏆 排行榜</button>
+  </div>
+  <div class="ad-slot"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4737693030554043" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+</div>
+
+<!-- LEADERBOARD MODAL -->
+<div class="modal-overlay" id="lbModal">
+  <div class="modal">
+    <button class="close" onclick="closeLB()">&times;</button>
+    <h2>🏆 全球排行榜</h2>
+    <div id="lbList"></div>
+  </div>
+</div>
+
+<canvas id="shareCanvas" width="1080" height="1080"></canvas>
+
+<script>
+// ---- Firebase ----
+firebase.initializeApp({
+  apiKey:"AIzaSyC977FBxgGqVCrEjYc_J5JlefMWNCgffg0",
+  authDomain:"yuchenchen-60a08.firebaseapp.com",
+  databaseURL:"https://yuchenchen-60a08-default-rtdb.firebaseio.com",
+  projectId:"yuchenchen-60a08"
+});
+const db = firebase.database();
+const scoresRef = db.ref('memory-scores');
+
+// ---- State ----
+let sequence = [];
+let playerIndex = 0;
+let level = 2;
+let score = 0;
+let gameActive = false;
+let showingSequence = false;
+let roundStartTime = 0;
+let tapTimes = [];
+let personalBest = parseInt(localStorage.getItem('ml-pb') || '0');
+
+// ---- Fake stats counter ----
+const baseFake = 1923847;
+const daysSinceBase = Math.floor((Date.now() - new Date('2025-06-01').getTime()) / 86400000);
+document.getElementById('fakeTotal').textContent = (baseFake + daysSinceBase * 312 + Math.floor(Math.random()*200)).toLocaleString();
+
+// ---- Screen management ----
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 'resultScreen') {
+    document.getElementById('resultScreen').scrollTop = 0;
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+// ---- Grid setup ----
+function buildGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  for (let i = 0; i < 16; i++) {
+    const tile = document.createElement('div');
+    tile.className = 'tile';
+    tile.dataset.index = i;
+    tile.addEventListener('click', () => handleTap(i));
+    tile.addEventListener('touchstart', (e) => { e.preventDefault(); handleTap(i); }, { passive: false });
+    grid.appendChild(tile);
+  }
+}
+
+// ---- Taunts ----
+const taunts = {
+  2: ["連金魚都記得住", "這是幼稚園等級"],
+  5: ["普通人類記憶力", "心理學教科書說 7±2 是極限"],
+  8: ["不錯，超越平均", "你的海馬迴還行"],
+  11: ["記憶宮殿使用者？", "你的工作記憶超標"],
+  15: ["超人級記憶", "你是不是用了什麼技巧"],
+  20: ["這不科學", "你的大腦不是正常人類的"],
+  25: ["已通報腦神經研究中心", "請捐獻大腦供科學研究"]
+};
+
+function getTaunt(lv) {
+  let pool;
+  if (lv >= 25) pool = taunts[25];
+  else if (lv >= 20) pool = taunts[20];
+  else if (lv >= 15) pool = taunts[15];
+  else if (lv >= 11) pool = taunts[11];
+  else if (lv >= 8) pool = taunts[8];
+  else if (lv >= 5) pool = taunts[5];
+  else pool = taunts[2];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// ---- Ranking ----
+function getRank(lv) {
+  if (lv >= 25) return { rank: 'SSS', cls: 'sss', pct: '前 0.01%' };
+  if (lv >= 20) return { rank: 'SS', cls: 'ss', pct: '前 0.1%' };
+  if (lv >= 15) return { rank: 'S', cls: 's', pct: '前 1%' };
+  if (lv >= 11) return { rank: 'A', cls: 'a', pct: '前 5%' };
+  if (lv >= 8) return { rank: 'B', cls: 'b', pct: '前 20%' };
+  if (lv >= 5) return { rank: 'C', cls: 'c', pct: '前 50%' };
+  if (lv >= 3) return { rank: 'D', cls: 'd', pct: '前 75%' };
+  return { rank: 'F', cls: 'f', pct: '你可能需要去看醫生' };
+}
+
+// ---- Age comparison ----
+function getAge(lv) {
+  if (lv >= 25) return '愛因斯坦的大腦（已捐贈）';
+  if (lv >= 20) return '記憶冠軍 25 歲';
+  if (lv >= 15) return '巔峰期 22 歲';
+  if (lv >= 11) return '大學生 20 歲';
+  if (lv >= 8) return '上班族 30 歲';
+  if (lv >= 5) return '中年人 45 歲';
+  if (lv >= 3) return '65 歲長者';
+  return '金魚 🐟（3 秒記憶）';
+}
+
+// ---- Milestones ----
+const milestones = [5, 8, 11, 15, 20, 25, 31];
+function getMilestoneProgress(lv) {
+  let prev = 2, next = 5;
+  for (const m of milestones) {
+    if (lv < m) { next = m; break; }
+    prev = m;
+    next = milestones[milestones.indexOf(m) + 1] || m + 6;
+  }
+  return Math.min(100, ((lv - prev) / (next - prev)) * 100);
+}
+
+// ---- Game logic ----
+function startGame() {
+  level = 2;
+  score = 0;
+  sequence = [];
+  showScreen('gameScreen');
+  buildGrid();
+  updateHUD();
+  setTimeout(() => nextRound(), 600);
+}
+
+function updateHUD() {
+  document.getElementById('levelDisplay').textContent = level;
+  document.getElementById('scoreDisplay').textContent = score;
+  document.getElementById('taunt').textContent = getTaunt(level);
+  document.getElementById('progressFill').style.width = getMilestoneProgress(level) + '%';
+}
+
+function nextRound() {
+  playerIndex = 0;
+  tapTimes = [];
+  gameActive = false;
+  showingSequence = true;
+  document.getElementById('status').textContent = '觀察序列...';
+
+  // Generate new sequence
+  sequence = [];
+  for (let i = 0; i < level; i++) {
+    let next;
+    do { next = Math.floor(Math.random() * 16); } while (sequence.length > 0 && next === sequence[sequence.length - 1]);
+    sequence.push(next);
+  }
+
+  // Show sequence
+  const tiles = document.querySelectorAll('.tile');
+  let delay = 400;
+  sequence.forEach((idx, i) => {
+    setTimeout(() => {
+      tiles[idx].classList.add('show');
+      tiles[idx].classList.add('pulse');
+    }, delay + i * 500);
+    setTimeout(() => {
+      tiles[idx].classList.remove('show');
+      tiles[idx].classList.remove('pulse');
+    }, delay + i * 500 + 300);
+  });
+
+  setTimeout(() => {
+    showingSequence = false;
+    gameActive = true;
+    roundStartTime = performance.now();
+    document.getElementById('status').textContent = `輪到你了！(0/${level})`;
+  }, delay + sequence.length * 500 + 200);
+}
+
+function handleTap(idx) {
+  if (!gameActive || showingSequence) return;
+
+  const tiles = document.querySelectorAll('.tile');
+  const tile = tiles[idx];
+
+  if (idx === sequence[playerIndex]) {
+    // Correct
+    tapTimes.push(performance.now());
+    tile.classList.add('correct', 'pulse');
+    setTimeout(() => tile.classList.remove('correct', 'pulse'), 250);
+
+    playerIndex++;
+    document.getElementById('status').textContent = `正確！(${playerIndex}/${level})`;
+
+    if (playerIndex === sequence.length) {
+      // Round complete
+      gameActive = false;
+      const elapsed = performance.now() - roundStartTime;
+      const avgTap = elapsed / level;
+      const speedBonus = Math.max(0, Math.floor((2000 - avgTap) / 10));
+      score += level * 10 + speedBonus;
+      level++;
+      updateHUD();
+      document.getElementById('status').textContent = speedBonus > 0 ? `速度加分 +${speedBonus}！` : '完美！';
+      setTimeout(() => nextRound(), 800);
+    }
+  } else {
+    // Wrong
+    gameActive = false;
+    tile.classList.add('wrong', 'shake');
+    // Show correct tile
+    setTimeout(() => {
+      tiles[sequence[playerIndex]].classList.add('show');
+    }, 300);
+    setTimeout(() => {
+      tile.classList.remove('wrong', 'shake');
+      tiles[sequence[playerIndex]].classList.remove('show');
+      endGame();
+    }, 1200);
+  }
+}
+
+function endGame() {
+  const finalLevel = level - 1; // last completed
+  const isNewPB = finalLevel > personalBest;
+  if (isNewPB) {
+    personalBest = finalLevel;
+    localStorage.setItem('ml-pb', personalBest);
+  }
+
+  const r = getRank(finalLevel);
+
+  document.getElementById('resultRank').textContent = r.rank;
+  document.getElementById('resultRank').className = 'result-rank ' + r.cls;
+  document.getElementById('resultLevel').textContent = finalLevel;
+  document.getElementById('resultMsg').textContent = getTaunt(finalLevel);
+  document.getElementById('resultPercentile').textContent = r.pct;
+  document.getElementById('resultAge').innerHTML = `你的記憶力相當於 <em>${getAge(finalLevel)}</em>`;
+
+  const pbText = isNewPB ? `🏆 個人最佳: Level ${personalBest} (NEW!)` : `🏆 個人最佳: Level ${personalBest}`;
+  document.getElementById('pbBadge').style.display = isNewPB ? 'block' : 'none';
+
+  document.getElementById('resultDetail').innerHTML = `
+    <strong>最終序列長度:</strong> ${finalLevel}<br>
+    <strong>總分:</strong> ${score}<br>
+    <strong>評級:</strong> ${r.rank} (${r.pct})<br>
+    <strong>個人最佳:</strong> Level ${personalBest}
+  `;
+
+  // Restore name if saved
+  const savedName = localStorage.getItem('ml-name') || '';
+  document.getElementById('playerName').value = savedName;
+
+  showScreen('resultScreen');
+
+  // Track with GA
+  if (typeof gtag === 'function') {
+    gtag('event', 'game_over', { level: finalLevel, score: score, rank: r.rank });
+  }
+}
+
+// ---- Score submission ----
+function submitScore() {
+  const name = document.getElementById('playerName').value.trim() || '匿名玩家';
+  localStorage.setItem('ml-name', name);
+  const finalLevel = parseInt(document.getElementById('resultLevel').textContent);
+  scoresRef.push({
+    name: name,
+    level: finalLevel,
+    score: score,
+    rank: getRank(finalLevel).rank,
+    ts: Date.now()
+  }).then(() => {
+    document.getElementById('nameInput').innerHTML = '<div style="color:#00ff88;font-size:.85rem">✅ 已上傳排行榜！</div>';
+  }).catch(() => {
+    document.getElementById('nameInput').innerHTML = '<div style="color:#ff2d55;font-size:.85rem">上傳失敗，請重試</div>';
+  });
+}
+
+// ---- Leaderboard ----
+function showLeaderboard() {
+  document.getElementById('lbModal').classList.add('active');
+  document.getElementById('lbList').innerHTML = '<div style="text-align:center;color:#888;padding:20px">載入中...</div>';
+  scoresRef.orderByChild('level').limitToLast(20).once('value').then(snap => {
+    const entries = [];
+    snap.forEach(c => entries.push(c.val()));
+    entries.sort((a, b) => b.level - a.level || b.score - a.score);
+    if (entries.length === 0) {
+      document.getElementById('lbList').innerHTML = '<div style="text-align:center;color:#888;padding:20px">還沒有紀錄</div>';
+      return;
+    }
+    document.getElementById('lbList').innerHTML = entries.map((e, i) => `
+      <div class="lb-row">
+        <span class="lb-rank">${i + 1}</span>
+        <span class="lb-name">${escHTML(e.name)}</span>
+        <span class="lb-score">Lv.${e.level} (${e.rank})</span>
+      </div>
+    `).join('');
+  }).catch(() => {
+    document.getElementById('lbList').innerHTML = '<div style="text-align:center;color:#888;padding:20px">載入失敗</div>';
+  });
+}
+function closeLB() { document.getElementById('lbModal').classList.remove('active'); }
+function escHTML(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// ---- PB display ----
+function showPB() {
+  alert(`個人最佳紀錄: Level ${personalBest}\n評級: ${getRank(personalBest).rank} (${getRank(personalBest).pct})`);
+}
+
+// ---- Share functions ----
+function getShareText() {
+  const lv = document.getElementById('resultLevel').textContent;
+  const r = getRank(parseInt(lv));
+  return `🧠 記憶極限 Memory Limit\n我達到了 Level ${lv}！評級: ${r.rank} (${r.pct})\n你的記憶力能撐到第幾關？\nhttps://yuchenchen-debug.github.io/memory-limit/`;
+}
+
+function shareLINE() {
+  window.open('https://social-plugins.line.me/lineit/share?url=' + encodeURIComponent('https://yuchenchen-debug.github.io/memory-limit/') + '&text=' + encodeURIComponent(getShareText()));
+}
+
+function shareX() {
+  window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(getShareText()));
+}
+
+function shareCopy() {
+  navigator.clipboard.writeText(getShareText()).then(() => {
+    const btn = event.target;
+    btn.textContent = '✅ 已複製';
+    setTimeout(() => btn.textContent = '📋 複製', 2000);
+  });
+}
+
+function generateShareImage() {
+  const canvas = document.getElementById('shareCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = 1080, H = 1080;
+
+  // Background
+  ctx.fillStyle = '#0a0a0f';
+  ctx.fillRect(0, 0, W, H);
+
+  // Decorative grid
+  ctx.strokeStyle = '#1e1e32';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 5; i++) {
+    for (let j = 0; j < 5; j++) {
+      const x = 140 + i * 160, y = 500 + j * 80;
+      ctx.strokeRect(x, y, 140, 60);
+    }
+  }
+
+  // Title
+  ctx.fillStyle = '#a855f7';
+  ctx.font = 'bold 64px -apple-system, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('🧠 記憶極限', W / 2, 140);
+
+  ctx.fillStyle = '#666';
+  ctx.font = '32px -apple-system, sans-serif';
+  ctx.fillText('Memory Limit Challenge', W / 2, 200);
+
+  // Level
+  const lv = document.getElementById('resultLevel').textContent;
+  const r = getRank(parseInt(lv));
+
+  ctx.fillStyle = '#e0e0e0';
+  ctx.font = 'bold 48px -apple-system, sans-serif';
+  ctx.fillText('我的記憶力', W / 2, 340);
+
+  // Rank
+  const rankColors = { sss: '#ffd700', ss: '#ff6b6b', s: '#ffd700', a: '#a855f7', b: '#6366f1', c: '#3b82f6', d: '#888', f: '#ff2d55' };
+  ctx.fillStyle = rankColors[r.cls] || '#a855f7';
+  ctx.font = 'bold 180px -apple-system, sans-serif';
+  ctx.fillText(r.rank, W / 2, 560);
+
+  ctx.fillStyle = '#e0e0e0';
+  ctx.font = 'bold 60px -apple-system, sans-serif';
+  ctx.fillText(`Level ${lv}`, W / 2, 650);
+
+  ctx.fillStyle = '#888';
+  ctx.font = '36px -apple-system, sans-serif';
+  ctx.fillText(r.pct, W / 2, 720);
+
+  // Age
+  ctx.fillStyle = '#aaa';
+  ctx.font = '30px -apple-system, sans-serif';
+  ctx.fillText(`記憶力相當於 ${getAge(parseInt(lv))}`, W / 2, 800);
+
+  // CTA
+  ctx.fillStyle = '#a855f7';
+  ctx.font = 'bold 34px -apple-system, sans-serif';
+  ctx.fillText('你的記憶力能撐到第幾關？', W / 2, 920);
+
+  ctx.fillStyle = '#666';
+  ctx.font = '26px -apple-system, sans-serif';
+  ctx.fillText('yuchenchen-debug.github.io/memory-limit', W / 2, 980);
+
+  return canvas;
+}
+
+function shareIG() {
+  const canvas = generateShareImage();
+  canvas.toBlob(blob => {
+    if (navigator.share) {
+      const file = new File([blob], 'memory-limit.png', { type: 'image/png' });
+      navigator.share({ files: [file] }).catch(() => {});
+    } else {
+      shareDL();
+    }
+  });
+}
+
+function shareDL() {
+  const canvas = generateShareImage();
+  const link = document.createElement('a');
+  link.download = 'memory-limit-result.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+// ---- PWA registration ----
+if ('serviceWorker' in navigator) {
+  // Minimal — no SW file needed for manifest link
+}
+
+// ---- AdSense push ----
+try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
+try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
+</script>
+</body>
+</html>
