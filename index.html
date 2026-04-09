@@ -34,6 +34,11 @@
 html,body{height:100%;overflow:hidden}
 body{background:#0a0a0f;color:#e0e0e0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;user-select:none}
 
+/* ---- lang switcher ---- */
+.lang-switcher{position:fixed;top:12px;right:12px;z-index:200}
+.lang-switcher select{background:#16162a;color:#ccc;border:1px solid #333;border-radius:8px;padding:6px 10px;font-size:.75rem;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:24px}
+.lang-switcher select:hover{border-color:#a855f7}
+
 /* ---- screens ---- */
 .screen{display:none;flex-direction:column;align-items:center;width:100%;max-width:420px;padding:0 16px}
 .screen.active{display:flex}
@@ -121,20 +126,37 @@ body{background:#0a0a0f;color:#e0e0e0;font-family:-apple-system,BlinkMacSystemFo
 </head>
 <body>
 
+<!-- LANG SWITCHER -->
+<div class="lang-switcher">
+  <select id="langSelect" onchange="changeLang(this.value)">
+    <option value="zh-TW">繁體中文</option>
+    <option value="en">English</option>
+    <option value="ja">日本語</option>
+    <option value="ko">한국어</option>
+    <option value="es">Español</option>
+    <option value="pt">Português</option>
+    <option value="de">Deutsch</option>
+    <option value="fr">Français</option>
+    <option value="th">ภาษาไทย</option>
+    <option value="id">Bahasa Indonesia</option>
+    <option value="vi">Tiếng Việt</option>
+  </select>
+</div>
+
 <!-- START SCREEN -->
 <div id="startScreen" class="screen active">
-  <h1>🧠 記憶極限</h1>
-  <div class="sub">Memory Limit Challenge</div>
+  <h1 data-i18n="title">🧠 記憶極限</h1>
+  <div class="sub" data-i18n="subtitle">Memory Limit Challenge</div>
   <div class="fake-stats">
-    📊 累計 <span id="fakeTotal">1,923,847</span> 人挑戰<br>
-    🧠 一般人類平均: <span>Level 7</span><br>
-    🏆 世界紀錄: <span>Level 31</span> (🇮🇳 MemoryGod)<br>
-    🔥 只有 <span>0.3%</span> 突破 Level 20
+    <span data-i18n="statPlayers">📊 累計</span> <span id="fakeTotal">1,923,847</span> <span data-i18n="statPlayersSuffix">人挑戰</span><br>
+    <span data-i18n="statAvg">🧠 一般人類平均:</span> <span>Level 7</span><br>
+    <span data-i18n="statRecord">🏆 世界紀錄:</span> <span>Level 31</span> (🇮🇳 MemoryGod)<br>
+    <span data-i18n="statElite">🔥 只有</span> <span>0.3%</span> <span data-i18n="statEliteSuffix">突破 Level 20</span>
   </div>
-  <button class="btn" onclick="startGame()">開始挑戰</button>
+  <button class="btn" data-i18n="startBtn" onclick="startGame()">開始挑戰</button>
   <div style="display:flex;gap:10px">
-    <button class="btn btn-sm" style="background:#16162a" onclick="showLeaderboard()">🏆 排行榜</button>
-    <button class="btn btn-sm" style="background:#16162a" onclick="showPB()">📈 個人紀錄</button>
+    <button class="btn btn-sm" style="background:#16162a" onclick="showLeaderboard()" data-i18n="leaderboardBtn">🏆 排行榜</button>
+    <button class="btn btn-sm" style="background:#16162a" onclick="showPB()" data-i18n="personalBtn">📈 個人紀錄</button>
   </div>
   <div class="ad-slot"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4737693030554043" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
 </div>
@@ -142,9 +164,9 @@ body{background:#0a0a0f;color:#e0e0e0;font-family:-apple-system,BlinkMacSystemFo
 <!-- GAME SCREEN -->
 <div id="gameScreen" class="screen">
   <div class="hud">
-    <div>序列長度</div>
+    <div data-i18n="seqLength">序列長度</div>
     <div class="level" id="levelDisplay">2</div>
-    <div>分數: <span id="scoreDisplay">0</span></div>
+    <div><span data-i18n="scoreLabel">分數:</span> <span id="scoreDisplay">0</span></div>
   </div>
   <div class="taunt" id="taunt"></div>
   <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
@@ -157,24 +179,24 @@ body{background:#0a0a0f;color:#e0e0e0;font-family:-apple-system,BlinkMacSystemFo
   <div class="result-rank" id="resultRank">B</div>
   <div class="result-level">Level <span id="resultLevel">0</span></div>
   <div class="result-msg" id="resultMsg"></div>
-  <div id="pbBadge" class="pb-badge" style="display:none">🎉 新紀錄！</div>
+  <div id="pbBadge" class="pb-badge" style="display:none" data-i18n="newRecord">🎉 新紀錄！</div>
   <div class="result-age" id="resultAge"></div>
   <div class="result-detail" id="resultDetail"></div>
   <div class="result-percentile" id="resultPercentile"></div>
   <div id="nameInput" style="display:flex;gap:8px;width:100%">
-    <input id="playerName" type="text" placeholder="輸入暱稱上傳排行榜" maxlength="16" style="flex:1;padding:10px 14px;border-radius:10px;border:1px solid #333;background:#16162a;color:#fff;font-size:.85rem">
-    <button class="btn btn-sm" onclick="submitScore()">送出</button>
+    <input id="playerName" type="text" data-i18n-placeholder="namePlaceholder" placeholder="輸入暱稱上傳排行榜" maxlength="16" style="flex:1;padding:10px 14px;border-radius:10px;border:1px solid #333;background:#16162a;color:#fff;font-size:.85rem">
+    <button class="btn btn-sm" onclick="submitScore()" data-i18n="submitBtn">送出</button>
   </div>
   <div class="share-row">
     <button class="share-btn share-line" onclick="shareLINE()">LINE</button>
     <button class="share-btn share-x" onclick="shareX()">𝕏 Twitter</button>
-    <button class="share-btn share-copy" onclick="shareCopy()">📋 複製</button>
+    <button class="share-btn share-copy" onclick="shareCopy()" data-i18n="copyBtn">📋 複製</button>
     <button class="share-btn share-ig" onclick="shareIG()">IG Story</button>
-    <button class="share-btn share-dl" onclick="shareDL()">📥 下載圖片</button>
+    <button class="share-btn share-dl" onclick="shareDL()" data-i18n="downloadBtn">📥 下載圖片</button>
   </div>
   <div class="bottom-btns">
-    <button class="btn" onclick="startGame()">再挑戰一次</button>
-    <button class="btn btn-sm" style="background:#16162a" onclick="showLeaderboard()">🏆 排行榜</button>
+    <button class="btn" onclick="startGame()" data-i18n="retryBtn">再挑戰一次</button>
+    <button class="btn btn-sm" style="background:#16162a" onclick="showLeaderboard()" data-i18n="leaderboardBtn">🏆 排行榜</button>
   </div>
   <div class="ad-slot"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4737693030554043" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
 </div>
@@ -183,7 +205,7 @@ body{background:#0a0a0f;color:#e0e0e0;font-family:-apple-system,BlinkMacSystemFo
 <div class="modal-overlay" id="lbModal">
   <div class="modal">
     <button class="close" onclick="closeLB()">&times;</button>
-    <h2>🏆 全球排行榜</h2>
+    <h2 data-i18n="lbTitle">🏆 全球排行榜</h2>
     <div id="lbList"></div>
   </div>
 </div>
@@ -191,6 +213,996 @@ body{background:#0a0a0f;color:#e0e0e0;font-family:-apple-system,BlinkMacSystemFo
 <canvas id="shareCanvas" width="1080" height="1080"></canvas>
 
 <script>
+// ---- i18n ----
+const LANG = {
+  'zh-TW': {
+    title: '🧠 記憶極限',
+    subtitle: 'Memory Limit Challenge',
+    metaTitle: '記憶極限 Memory Limit — 你的記憶力能撐到第幾關？',
+    metaDesc: '記憶極限：格子依序亮起，你能記住多長的序列？挑戰你的大腦極限！',
+    ogTitle: '記憶極限 Memory Limit',
+    ogDesc: '我在記憶極限達到了 Level __！你的記憶力能撐到第幾關？',
+    twitterTitle: '記憶極限 Memory Limit',
+    twitterDesc: '你的記憶力能撐到第幾關？挑戰你的大腦極限！',
+    statPlayers: '📊 累計',
+    statPlayersSuffix: '人挑戰',
+    statAvg: '🧠 一般人類平均:',
+    statRecord: '🏆 世界紀錄:',
+    statElite: '🔥 只有',
+    statEliteSuffix: '突破 Level 20',
+    startBtn: '開始挑戰',
+    leaderboardBtn: '🏆 排行榜',
+    personalBtn: '📈 個人紀錄',
+    seqLength: '序列長度',
+    scoreLabel: '分數:',
+    watching: '觀察序列...',
+    yourTurn: '輪到你了！',
+    correct: '正確！',
+    speedBonus: '速度加分 +__！',
+    perfect: '完美！',
+    newRecord: '🎉 新紀錄！',
+    namePlaceholder: '輸入暱稱上傳排行榜',
+    submitBtn: '送出',
+    copyBtn: '📋 複製',
+    downloadBtn: '📥 下載圖片',
+    retryBtn: '再挑戰一次',
+    lbTitle: '🏆 全球排行榜',
+    lbLoading: '載入中...',
+    lbEmpty: '還沒有紀錄',
+    lbFail: '載入失敗',
+    uploaded: '✅ 已上傳排行榜！',
+    uploadFail: '上傳失敗，請重試',
+    copied: '✅ 已複製',
+    anonName: '匿名玩家',
+    pbAlert: '個人最佳紀錄: Level __\n評級: __ (__)',
+    agePrefix: '你的記憶力相當於',
+    detailSeqLen: '最終序列長度:',
+    detailScore: '總分:',
+    detailRank: '評級:',
+    detailPB: '個人最佳:',
+    pbLabel: '🏆 個人最佳: Level __',
+    pbLabelNew: '🏆 個人最佳: Level __ (NEW!)',
+    shareText: '🧠 記憶極限 Memory Limit\n我達到了 Level __！評級: __ (__)\n你的記憶力能撐到第幾關？\nhttps://yuchenchen-debug.github.io/memory-limit/',
+    shareImgTitle: '🧠 記憶極限',
+    shareImgSub: 'Memory Limit Challenge',
+    shareImgMyMemory: '我的記憶力',
+    shareImgAge: '記憶力相當於 __',
+    shareImgCTA: '你的記憶力能撐到第幾關？',
+    moreGames: '🎮 更多挑戰',
+    gameMs: '千分之一秒',
+    gameMsHook: '只有 0.01% 拿到 SSS 級',
+    gameColor: '色覺測試',
+    gameColorHook: '只有 2.1% 通過 Level 25',
+    gameReaction: '反應力測試',
+    gameReactionHook: '你比 273ms 更快嗎？',
+    taunts: {
+      2: ['連金魚都記得住', '這是幼稚園等級'],
+      5: ['普通人類記憶力', '心理學教科書說 7±2 是極限'],
+      8: ['不錯，超越平均', '你的海馬迴還行'],
+      11: ['記憶宮殿使用者？', '你的工作記憶超標'],
+      15: ['超人級記憶', '你是不是用了什麼技巧'],
+      20: ['這不科學', '你的大腦不是正常人類的'],
+      25: ['已通報腦神經研究中心', '請捐獻大腦供科學研究']
+    },
+    ranks: {
+      sss: '前 0.01%', ss: '前 0.1%', s: '前 1%', a: '前 5%', b: '前 20%', c: '前 50%', d: '前 75%', f: '你可能需要去看醫生'
+    },
+    ages: {
+      25: '愛因斯坦的大腦（已捐贈）',
+      20: '記憶冠軍 25 歲',
+      15: '巔峰期 22 歲',
+      11: '大學生 20 歲',
+      8: '上班族 30 歲',
+      5: '中年人 45 歲',
+      3: '65 歲長者',
+      0: '金魚 🐟（3 秒記憶）'
+    },
+    needDoctor: '你可能需要去看醫生'
+  },
+  'en': {
+    title: '🧠 Memory Limit',
+    subtitle: 'How Far Can You Go?',
+    metaTitle: 'Memory Limit — How many levels can you survive?',
+    metaDesc: 'Memory Limit: Tiles light up in sequence. Can you remember the order? Push your brain to the limit!',
+    ogTitle: 'Memory Limit',
+    ogDesc: 'I reached Level __ in Memory Limit! How far can you go?',
+    twitterTitle: 'Memory Limit',
+    twitterDesc: 'How many levels can you survive? Push your brain to the limit!',
+    statPlayers: '📊 Total',
+    statPlayersSuffix: 'players challenged',
+    statAvg: '🧠 Average human:',
+    statRecord: '🏆 World record:',
+    statElite: '🔥 Only',
+    statEliteSuffix: 'passed Level 20',
+    startBtn: 'Start Challenge',
+    leaderboardBtn: '🏆 Leaderboard',
+    personalBtn: '📈 My Best',
+    seqLength: 'Sequence',
+    scoreLabel: 'Score:',
+    watching: 'Watch the sequence...',
+    yourTurn: 'Your turn!',
+    correct: 'Correct!',
+    speedBonus: 'Speed bonus +__!',
+    perfect: 'Perfect!',
+    newRecord: '🎉 New Record!',
+    namePlaceholder: 'Enter nickname for leaderboard',
+    submitBtn: 'Submit',
+    copyBtn: '📋 Copy',
+    downloadBtn: '📥 Download',
+    retryBtn: 'Try Again',
+    lbTitle: '🏆 Global Leaderboard',
+    lbLoading: 'Loading...',
+    lbEmpty: 'No records yet',
+    lbFail: 'Failed to load',
+    uploaded: '✅ Uploaded to leaderboard!',
+    uploadFail: 'Upload failed, try again',
+    copied: '✅ Copied',
+    anonName: 'Anonymous',
+    pbAlert: 'Personal best: Level __\nRank: __ (__)',
+    agePrefix: 'Your memory is equivalent to',
+    detailSeqLen: 'Final sequence:',
+    detailScore: 'Total score:',
+    detailRank: 'Rank:',
+    detailPB: 'Personal best:',
+    pbLabel: '🏆 Personal best: Level __',
+    pbLabelNew: '🏆 Personal best: Level __ (NEW!)',
+    shareText: '🧠 Memory Limit\nI reached Level __! Rank: __ (__)\nHow far can YOUR brain go?\nhttps://yuchenchen-debug.github.io/memory-limit/',
+    shareImgTitle: '🧠 Memory Limit',
+    shareImgSub: 'Memory Limit Challenge',
+    shareImgMyMemory: 'My Memory',
+    shareImgAge: 'Memory equivalent to __',
+    shareImgCTA: 'How far can YOUR brain go?',
+    moreGames: '🎮 More Challenges',
+    gameMs: 'Millisecond',
+    gameMsHook: 'Only 0.01% get SSS rank',
+    gameColor: 'Color IQ Test',
+    gameColorHook: 'Only 2.1% pass Level 25',
+    gameReaction: 'Reaction Test',
+    gameReactionHook: 'Are you faster than 273ms?',
+    taunts: {
+      2: ['Even a goldfish can remember this', 'Bro... this is the tutorial'],
+      5: ['Average NPC memory right here', 'The textbook says 7±2 is the limit lol'],
+      8: ['OK not bad, you passed the vibe check', 'Your hippocampus is showing off'],
+      11: ['Memory palace enjoyer?', 'Sir, your working memory is illegal'],
+      15: ['Actual superhuman detected', 'Are you cheating or just built different?'],
+      20: ['This is scientifically impossible', 'Your brain is not from this planet'],
+      25: ['Reported to neuroscience labs', 'Please donate your brain to science']
+    },
+    ranks: {
+      sss: 'Top 0.01%', ss: 'Top 0.1%', s: 'Top 1%', a: 'Top 5%', b: 'Top 20%', c: 'Top 50%', d: 'Top 75%', f: 'You might need to see a doctor'
+    },
+    ages: {
+      25: "Einstein's brain (donated)",
+      20: 'Memory champion, age 25',
+      15: 'Peak performance, age 22',
+      11: 'College student, age 20',
+      8: 'Office worker, age 30',
+      5: 'Middle-aged, 45',
+      3: 'Senior, age 65',
+      0: 'Goldfish 🐟 (3-second memory)'
+    }
+  },
+  'ja': {
+    title: '🧠 記憶の限界',
+    subtitle: 'Memory Limit Challenge',
+    metaTitle: '記憶の限界 — あなたの記憶力は何レベルまで？',
+    metaDesc: '記憶の限界：タイルが順番に光ります。どこまで覚えられますか？',
+    ogTitle: '記憶の限界 Memory Limit',
+    ogDesc: '記憶の限界でLevel __に到達しました！あなたは何レベルまで？',
+    twitterTitle: '記憶の限界 Memory Limit',
+    twitterDesc: 'あなたの記憶力は何レベルまで耐えられますか？',
+    statPlayers: '📊 累計',
+    statPlayersSuffix: '人が挑戦',
+    statAvg: '🧠 一般人の平均:',
+    statRecord: '🏆 世界記録:',
+    statElite: '🔥 わずか',
+    statEliteSuffix: 'がLevel 20を突破',
+    startBtn: 'チャレンジ開始',
+    leaderboardBtn: '🏆 ランキング',
+    personalBtn: '📈 自己ベスト',
+    seqLength: '配列の長さ',
+    scoreLabel: 'スコア:',
+    watching: '配列を観察...',
+    yourTurn: 'あなたの番です！',
+    correct: '正解！',
+    speedBonus: 'スピードボーナス +__！',
+    perfect: 'パーフェクト！',
+    newRecord: '🎉 新記録！',
+    namePlaceholder: 'ニックネームを入力',
+    submitBtn: '送信',
+    copyBtn: '📋 コピー',
+    downloadBtn: '📥 ダウンロード',
+    retryBtn: 'もう一度挑戦',
+    lbTitle: '🏆 グローバルランキング',
+    lbLoading: '読み込み中...',
+    lbEmpty: 'まだ記録がありません',
+    lbFail: '読み込み失敗',
+    uploaded: '✅ ランキングにアップロードしました！',
+    uploadFail: 'アップロード失敗、再試行してください',
+    copied: '✅ コピーしました',
+    anonName: '匿名プレイヤー',
+    pbAlert: '自己ベスト: Level __\nランク: __ (__)',
+    agePrefix: 'あなたの記憶力は同等です',
+    detailSeqLen: '最終配列長:',
+    detailScore: '合計スコア:',
+    detailRank: 'ランク:',
+    detailPB: '自己ベスト:',
+    pbLabel: '🏆 自己ベスト: Level __',
+    pbLabelNew: '🏆 自己ベスト: Level __ (NEW!)',
+    shareText: '🧠 記憶の限界\nLevel __に到達しました！ランク: __ (__)\nあなたは何レベルまで？\nhttps://yuchenchen-debug.github.io/memory-limit/',
+    shareImgTitle: '🧠 記憶の限界',
+    shareImgSub: 'Memory Limit Challenge',
+    shareImgMyMemory: '私の記憶力',
+    shareImgAge: '記憶力は __ と同等',
+    shareImgCTA: 'あなたは何レベルまで耐えられますか？',
+    moreGames: '🎮 もっとチャレンジ',
+    gameMs: 'ミリ秒チャレンジ',
+    gameMsHook: 'SSS級はわずか0.01%',
+    gameColor: '色覚テスト',
+    gameColorHook: 'Level 25突破はわずか2.1%',
+    gameReaction: '反射神経テスト',
+    gameReactionHook: '273msより速いですか？',
+    taunts: {
+      2: ['大変恐れ入りますが...金魚でも覚えられます', 'お上手ですね（幼稚園レベルですが）'],
+      5: ['まあ...一般的な人間ですね', '教科書通りの凡人で安心しました'],
+      8: ['お、やりますね...少しだけ見直しました', '海馬が多少は仕事してるようですね'],
+      11: ['失礼ですが、記憶宮殿の住民ですか？', 'ワーキングメモリが規格外です...通報しますね'],
+      15: ['完全に人間の域を超えてます', 'もしかして脳にチップ入ってません？'],
+      20: ['科学的にあり得ません。嘘でしょう？', '脳神経学会が泣いて喜びます'],
+      25: ['脳神経研究センターに通報済みです', '死後に脳の寄贈をお願いします（真顔）']
+    },
+    ranks: {
+      sss: '上位 0.01%', ss: '上位 0.1%', s: '上位 1%', a: '上位 5%', b: '上位 20%', c: '上位 50%', d: '上位 75%', f: '病院に行った方がいいかもしれません'
+    },
+    ages: {
+      25: 'アインシュタインの脳（寄贈済み）',
+      20: '記憶チャンピオン 25歳',
+      15: '絶頂期 22歳',
+      11: '大学生 20歳',
+      8: '会社員 30歳',
+      5: '中年 45歳',
+      3: '65歳のお年寄り',
+      0: '金魚 🐟（3秒の記憶）'
+    }
+  },
+  'ko': {
+    title: '🧠 기억의 한계',
+    subtitle: '메모리 리밋 챌린지',
+    metaTitle: '기억의 한계 — 몇 레벨까지 갈 수 있어?',
+    metaDesc: '기억의 한계: 타일이 순서대로 빛납니다. 어디까지 기억할 수 있나요?',
+    ogTitle: '기억의 한계 Memory Limit',
+    ogDesc: '기억의 한계에서 Level __에 도달했어! 너는 몇 레벨까지?',
+    twitterTitle: '기억의 한계 Memory Limit',
+    twitterDesc: '너의 기억력은 몇 레벨까지 버틸 수 있어?',
+    statPlayers: '📊 누적',
+    statPlayersSuffix: '명 도전',
+    statAvg: '🧠 일반인 평균:',
+    statRecord: '🏆 세계 기록:',
+    statElite: '🔥 단',
+    statEliteSuffix: '만 Level 20 돌파',
+    startBtn: '도전 시작',
+    leaderboardBtn: '🏆 랭킹',
+    personalBtn: '📈 내 기록',
+    seqLength: '시퀀스 길이',
+    scoreLabel: '점수:',
+    watching: '시퀀스를 관찰...',
+    yourTurn: '네 차례!',
+    correct: '정답!',
+    speedBonus: '스피드 보너스 +__!',
+    perfect: '퍼펙트!',
+    newRecord: '🎉 신기록!',
+    namePlaceholder: '닉네임 입력',
+    submitBtn: '제출',
+    copyBtn: '📋 복사',
+    downloadBtn: '📥 다운로드',
+    retryBtn: '다시 도전',
+    lbTitle: '🏆 글로벌 랭킹',
+    lbLoading: '로딩 중...',
+    lbEmpty: '아직 기록 없음',
+    lbFail: '로딩 실패',
+    uploaded: '✅ 랭킹에 등록 완료!',
+    uploadFail: '업로드 실패, 다시 시도해주세요',
+    copied: '✅ 복사 완료',
+    anonName: '익명 플레이어',
+    pbAlert: '개인 최고: Level __\n등급: __ (__)',
+    agePrefix: '당신의 기억력은 동등합니다',
+    detailSeqLen: '최종 시퀀스:',
+    detailScore: '총점:',
+    detailRank: '등급:',
+    detailPB: '개인 최고:',
+    pbLabel: '🏆 개인 최고: Level __',
+    pbLabelNew: '🏆 개인 최고: Level __ (NEW!)',
+    shareText: '🧠 기억의 한계\nLevel __에 도달! 등급: __ (__)\n너는 몇 레벨까지 갈 수 있어?\nhttps://yuchenchen-debug.github.io/memory-limit/',
+    shareImgTitle: '🧠 기억의 한계',
+    shareImgSub: 'Memory Limit Challenge',
+    shareImgMyMemory: '나의 기억력',
+    shareImgAge: '기억력은 __ 수준',
+    shareImgCTA: '너는 몇 레벨까지 버틸 수 있어?',
+    moreGames: '🎮 더 많은 도전',
+    gameMs: '밀리초 챌린지',
+    gameMsHook: '0.01%만 SSS 등급 달성',
+    gameColor: '색각 테스트',
+    gameColorHook: '2.1%만 Level 25 통과',
+    gameReaction: '반응속도 테스트',
+    gameReactionHook: '273ms보다 빠르니?',
+    taunts: {
+      2: ['브론즈도 이건 깬다 ㅋㅋ', '이건 튜토리얼인데... GG?'],
+      5: ['실버 수준 ㄱㅇㄷ', '7±2가 한계라는데 딱 평범하네 ㅋ'],
+      8: ['오 골드 각? 나쁘지 않다', '해마가 좀 일하네 ㅋㅋ'],
+      11: ['다이아 가능? 기억궁전 유저?', '워킹메모리 핵 의심 ㄷㄷ'],
+      15: ['챌린저 뇌 ㄹㅇ 실화?', '에이밍 아니고 기억력 핵이냐'],
+      20: ['프로게이머 뇌 아님? ㄹㅇ ㅋㅋ', '이건 과학적으로 말이 안 됨 ㄷㄷ'],
+      25: ['뇌과학연구소에 신고 접수함', '뇌 기증 부탁드립니다 (진지)']
+    },
+    ranks: {
+      sss: '상위 0.01%', ss: '상위 0.1%', s: '상위 1%', a: '상위 5%', b: '상위 20%', c: '상위 50%', d: '상위 75%', f: '병원 가봐야 할 수도 ㅋㅋ'
+    },
+    ages: {
+      25: '아인슈타인의 뇌 (기증됨)',
+      20: '기억력 챔피언 25세',
+      15: '전성기 22세',
+      11: '대학생 20세',
+      8: '직장인 30세',
+      5: '중년 45세',
+      3: '65세 어르신',
+      0: '금붕어 🐟 (3초 기억)'
+    }
+  },
+  'es': {
+    title: '🧠 Limite de Memoria',
+    subtitle: 'Desafio de Memoria',
+    metaTitle: 'Limite de Memoria — Cuantos niveles puedes sobrevivir?',
+    metaDesc: 'Limite de Memoria: Las casillas se iluminan en secuencia. Puedes recordar el orden?',
+    ogTitle: 'Limite de Memoria',
+    ogDesc: 'Llegue al Level __ en Limite de Memoria! Cuantos niveles puedes sobrevivir?',
+    twitterTitle: 'Limite de Memoria',
+    twitterDesc: 'Cuantos niveles puede sobrevivir tu cerebro?',
+    statPlayers: '📊 Total',
+    statPlayersSuffix: 'jugadores',
+    statAvg: '🧠 Promedio humano:',
+    statRecord: '🏆 Record mundial:',
+    statElite: '🔥 Solo',
+    statEliteSuffix: 'superaron Level 20',
+    startBtn: 'Iniciar Desafio',
+    leaderboardBtn: '🏆 Clasificacion',
+    personalBtn: '📈 Mi Record',
+    seqLength: 'Secuencia',
+    scoreLabel: 'Puntos:',
+    watching: 'Observa la secuencia...',
+    yourTurn: 'Tu turno!',
+    correct: 'Correcto!',
+    speedBonus: 'Bonus de velocidad +__!',
+    perfect: 'Perfecto!',
+    newRecord: '🎉 Nuevo Record!',
+    namePlaceholder: 'Ingresa tu nombre',
+    submitBtn: 'Enviar',
+    copyBtn: '📋 Copiar',
+    downloadBtn: '📥 Descargar',
+    retryBtn: 'Intentar de Nuevo',
+    lbTitle: '🏆 Clasificacion Global',
+    lbLoading: 'Cargando...',
+    lbEmpty: 'Sin registros aun',
+    lbFail: 'Error al cargar',
+    uploaded: '✅ Subido a la clasificacion!',
+    uploadFail: 'Error al subir, intenta de nuevo',
+    copied: '✅ Copiado',
+    anonName: 'Jugador Anonimo',
+    pbAlert: 'Mejor marca personal: Level __\nRango: __ (__)',
+    agePrefix: 'Tu memoria equivale a',
+    detailSeqLen: 'Secuencia final:',
+    detailScore: 'Puntuacion total:',
+    detailRank: 'Rango:',
+    detailPB: 'Mejor marca:',
+    pbLabel: '🏆 Mejor marca: Level __',
+    pbLabelNew: '🏆 Mejor marca: Level __ (NEW!)',
+    shareText: '🧠 Limite de Memoria\nLlegue al Level __! Rango: __ (__)\nCuantos niveles puedes sobrevivir?\nhttps://yuchenchen-debug.github.io/memory-limit/',
+    shareImgTitle: '🧠 Limite de Memoria',
+    shareImgSub: 'Memory Limit Challenge',
+    shareImgMyMemory: 'Mi Memoria',
+    shareImgAge: 'Memoria equivalente a __',
+    shareImgCTA: 'Cuantos niveles puedes sobrevivir?',
+    moreGames: '🎮 Mas Desafios',
+    gameMs: 'Milisegundo',
+    gameMsHook: 'Solo 0.01% logran SSS',
+    gameColor: 'Test de Color',
+    gameColorHook: 'Solo 2.1% pasan Level 25',
+    gameReaction: 'Test de Reaccion',
+    gameReactionHook: 'Eres mas rapido que 273ms?',
+    taunts: {
+      2: ['DIOS MIO... hasta un pez dorado recuerda esto', 'Esto es nivel preescolar, mi amor'],
+      5: ['Ay, memoria de humano promedio... que tragedia', 'El libro dice 7±2 y tu justo ahi... que drama'],
+      8: ['Bueno bueno, no esta mal... PERO PODRIAS MAS', 'Tu hipocampo esta haciendo el minimo esfuerzo'],
+      11: ['ESPERA — usas palacio de memoria?!', 'Tu memoria de trabajo esta FUERA DE CONTROL'],
+      15: ['INCREIBLE! Esto no es normal!', 'Estas haciendo trampa o eres un GENIO?!'],
+      20: ['IMPOSIBLE! La ciencia no lo explica!', 'Tu cerebro NO ES DE ESTE PLANETA!'],
+      25: ['REPORTADO al centro de neurociencia!', 'DONA tu cerebro a la ciencia POR FAVOR!']
+    },
+    ranks: {
+      sss: 'Top 0.01%', ss: 'Top 0.1%', s: 'Top 1%', a: 'Top 5%', b: 'Top 20%', c: 'Top 50%', d: 'Top 75%', f: 'Quizas necesitas ver a un doctor'
+    },
+    ages: {
+      25: 'Cerebro de Einstein (donado)',
+      20: 'Campeon de memoria, 25 anos',
+      15: 'Rendimiento maximo, 22 anos',
+      11: 'Universitario, 20 anos',
+      8: 'Oficinista, 30 anos',
+      5: 'Mediana edad, 45 anos',
+      3: 'Adulto mayor, 65 anos',
+      0: 'Pez dorado 🐟 (memoria de 3 seg)'
+    }
+  },
+  'pt': {
+    title: '🧠 Limite de Memoria',
+    subtitle: 'Desafio de Memoria',
+    metaTitle: 'Limite de Memoria — Quantos niveis voce aguenta?',
+    metaDesc: 'Limite de Memoria: Blocos acendem em sequencia. Voce consegue lembrar?',
+    ogTitle: 'Limite de Memoria',
+    ogDesc: 'Cheguei no Level __ no Limite de Memoria! E voce, aguenta ate onde?',
+    twitterTitle: 'Limite de Memoria',
+    twitterDesc: 'Quantos niveis seu cerebro aguenta?',
+    statPlayers: '📊 Total de',
+    statPlayersSuffix: 'jogadores',
+    statAvg: '🧠 Media humana:',
+    statRecord: '🏆 Recorde mundial:',
+    statElite: '🔥 Apenas',
+    statEliteSuffix: 'passaram do Level 20',
+    startBtn: 'Comecar Desafio',
+    leaderboardBtn: '🏆 Ranking',
+    personalBtn: '📈 Meu Recorde',
+    seqLength: 'Sequencia',
+    scoreLabel: 'Pontos:',
+    watching: 'Observe a sequencia...',
+    yourTurn: 'Sua vez!',
+    correct: 'Certo!',
+    speedBonus: 'Bonus de velocidade +__!',
+    perfect: 'Perfeito!',
+    newRecord: '🎉 Novo Recorde!',
+    namePlaceholder: 'Digite seu apelido',
+    submitBtn: 'Enviar',
+    copyBtn: '📋 Copiar',
+    downloadBtn: '📥 Baixar',
+    retryBtn: 'Tentar de Novo',
+    lbTitle: '🏆 Ranking Global',
+    lbLoading: 'Carregando...',
+    lbEmpty: 'Nenhum registro ainda',
+    lbFail: 'Falha ao carregar',
+    uploaded: '✅ Enviado pro ranking!',
+    uploadFail: 'Falha no envio, tente novamente',
+    copied: '✅ Copiado',
+    anonName: 'Jogador Anonimo',
+    pbAlert: 'Melhor marca: Level __\nRank: __ (__)',
+    agePrefix: 'Sua memoria equivale a',
+    detailSeqLen: 'Sequencia final:',
+    detailScore: 'Pontuacao total:',
+    detailRank: 'Rank:',
+    detailPB: 'Melhor marca:',
+    pbLabel: '🏆 Melhor marca: Level __',
+    pbLabelNew: '🏆 Melhor marca: Level __ (NEW!)',
+    shareText: '🧠 Limite de Memoria\nCheguei no Level __! Rank: __ (__)\nE voce, aguenta ate onde?\nhttps://yuchenchen-debug.github.io/memory-limit/',
+    shareImgTitle: '🧠 Limite de Memoria',
+    shareImgSub: 'Memory Limit Challenge',
+    shareImgMyMemory: 'Minha Memoria',
+    shareImgAge: 'Memoria equivalente a __',
+    shareImgCTA: 'E voce, aguenta ate onde?',
+    moreGames: '🎮 Mais Desafios',
+    gameMs: 'Milissegundo',
+    gameMsHook: 'So 0.01% conseguem SSS',
+    gameColor: 'Teste de Cores',
+    gameColorHook: 'So 2.1% passam do Level 25',
+    gameReaction: 'Teste de Reacao',
+    gameReactionHook: 'Voce e mais rapido que 273ms?',
+    taunts: {
+      2: ['Eita kkkk ate peixinho dourado lembra isso', 'Mano, isso eh nivel creche kkkkk'],
+      5: ['Memoria de ser humano normal ne kkkk', 'O livro fala 7±2 e vc ta certinho ai kkk'],
+      8: ['Opa, nada mal hein! Ta evoluindo', 'Teu hipocampo ta ate funcionando kkk'],
+      11: ['Vc usa palacio da memoria? Suspeito demais', 'Memoria de trabalho acima da media... hmm'],
+      15: ['CARACA!! Isso nao eh normal nao!', 'Ce ta usando hack ou eh genio? kkkk'],
+      20: ['NAO EH POSSIVEL IRMAO kkkkkk', 'Teu cerebro eh de outro planeta mano'],
+      25: ['Ja liguei pro laboratório de neurociencia kkk', 'Por favor doe seu cerebro pra ciencia 🙏']
+    },
+    ranks: {
+      sss: 'Top 0.01%', ss: 'Top 0.1%', s: 'Top 1%', a: 'Top 5%', b: 'Top 20%', c: 'Top 50%', d: 'Top 75%', f: 'Talvez precise ir ao medico kkk'
+    },
+    ages: {
+      25: 'Cerebro do Einstein (doado)',
+      20: 'Campeao de memoria, 25 anos',
+      15: 'Auge, 22 anos',
+      11: 'Universitario, 20 anos',
+      8: 'Trabalhador, 30 anos',
+      5: 'Meia-idade, 45 anos',
+      3: 'Idoso, 65 anos',
+      0: 'Peixinho dourado 🐟 (3 seg de memoria)'
+    }
+  },
+  'de': {
+    title: '🧠 Gedachtnislimit',
+    subtitle: 'Memory Limit Challenge',
+    metaTitle: 'Gedachtnislimit — Wie viele Level schaffst du?',
+    metaDesc: 'Gedachtnislimit: Kacheln leuchten nacheinander auf. Kannst du dir die Reihenfolge merken?',
+    ogTitle: 'Gedachtnislimit',
+    ogDesc: 'Ich habe Level __ im Gedachtnislimit erreicht! Wie weit schaffst du es?',
+    twitterTitle: 'Gedachtnislimit',
+    twitterDesc: 'Wie viele Level kann dein Gehirn uberstehen?',
+    statPlayers: '📊 Insgesamt',
+    statPlayersSuffix: 'Spieler',
+    statAvg: '🧠 Menschlicher Durchschnitt:',
+    statRecord: '🏆 Weltrekord:',
+    statElite: '🔥 Nur',
+    statEliteSuffix: 'haben Level 20 geschafft',
+    startBtn: 'Challenge Starten',
+    leaderboardBtn: '🏆 Rangliste',
+    personalBtn: '📈 Mein Rekord',
+    seqLength: 'Sequenz',
+    scoreLabel: 'Punkte:',
+    watching: 'Sequenz beobachten...',
+    yourTurn: 'Du bist dran!',
+    correct: 'Richtig!',
+    speedBonus: 'Geschwindigkeitsbonus +__!',
+    perfect: 'Perfekt!',
+    newRecord: '🎉 Neuer Rekord!',
+    namePlaceholder: 'Spitzname eingeben',
+    submitBtn: 'Senden',
+    copyBtn: '📋 Kopieren',
+    downloadBtn: '📥 Herunterladen',
+    retryBtn: 'Nochmal',
+    lbTitle: '🏆 Globale Rangliste',
+    lbLoading: 'Laden...',
+    lbEmpty: 'Noch keine Eintraege',
+    lbFail: 'Laden fehlgeschlagen',
+    uploaded: '✅ In Rangliste eingetragen!',
+    uploadFail: 'Upload fehlgeschlagen, bitte erneut versuchen',
+    copied: '✅ Kopiert',
+    anonName: 'Anonymer Spieler',
+    pbAlert: 'Persoenliche Bestleistung: Level __\nRang: __ (__)',
+    agePrefix: 'Dein Gedaechtnis entspricht',
+    detailSeqLen: 'Finale Sequenz:',
+    detailScore: 'Gesamtpunkte:',
+    detailRank: 'Rang:',
+    detailPB: 'Bestleistung:',
+    pbLabel: '🏆 Bestleistung: Level __',
+    pbLabelNew: '🏆 Bestleistung: Level __ (NEW!)',
+    shareText: '🧠 Gedachtnislimit\nIch habe Level __ erreicht! Rang: __ (__)\nWie weit schaffst du es?\nhttps://yuchenchen-debug.github.io/memory-limit/',
+    shareImgTitle: '🧠 Gedachtnislimit',
+    shareImgSub: 'Memory Limit Challenge',
+    shareImgMyMemory: 'Mein Gedaechtnis',
+    shareImgAge: 'Gedaechtnis entspricht __',
+    shareImgCTA: 'Wie weit schaffst du es?',
+    moreGames: '🎮 Mehr Herausforderungen',
+    gameMs: 'Millisekunde',
+    gameMsHook: 'Nur 0.01% erreichen SSS',
+    gameColor: 'Farbsehtest',
+    gameColorHook: 'Nur 2.1% schaffen Level 25',
+    gameReaction: 'Reaktionstest',
+    gameReactionHook: 'Bist du schneller als 273ms?',
+    taunts: {
+      2: ['Technisch gesehen hat ein Goldfisch das auch geschafft.', 'Kindergartenniveau. Praezise.'],
+      5: ['Statistisch durchschnittlich. Wie erwartet.', 'Das Lehrbuch sagt 7±2. Du bist... im Lehrbuch.'],
+      8: ['Akzeptabel. Marginal ueber dem Durchschnitt.', 'Dein Hippocampus funktioniert. Befriedigend.'],
+      11: ['Gedaechtnispalast-Methode? Methodisch korrekt.', 'Arbeitsgedaechtnis ueber Norm. Dokumentiert.'],
+      15: ['Uebermenschlich. Das ist nicht im Referenzbereich.', 'Benutzt du Mnemonik oder ist das natuerlich? Ernst gemeint.'],
+      20: ['Wissenschaftlich nicht erklaerbar. Beunruhigend.', 'Dein Gehirn weicht signifikant von der Norm ab.'],
+      25: ['Meldung an das Neurowissenschaftszentrum ist raus.', 'Bitte testamentarisch Ihr Gehirn der Forschung vermachen.']
+    },
+    ranks: {
+      sss: 'Top 0.01%', ss: 'Top 0.1%', s: 'Top 1%', a: 'Top 5%', b: 'Top 20%', c: 'Top 50%', d: 'Top 75%', f: 'Arztbesuch empfohlen'
+    },
+    ages: {
+      25: 'Einsteins Gehirn (gespendet)',
+      20: 'Gedaechtnismeister, 25 Jahre',
+      15: 'Hoechstleistung, 22 Jahre',
+      11: 'Student, 20 Jahre',
+      8: 'Bueroangestellter, 30 Jahre',
+      5: 'Mittleres Alter, 45 Jahre',
+      3: 'Senior, 65 Jahre',
+      0: 'Goldfisch 🐟 (3 Sekunden Gedaechtnis)'
+    }
+  },
+  'fr': {
+    title: '🧠 Limite de Memoire',
+    subtitle: 'Memory Limit Challenge',
+    metaTitle: 'Limite de Memoire — Combien de niveaux survivrez-vous?',
+    metaDesc: 'Limite de Memoire : Les cases s\'illuminent en sequence. Pouvez-vous retenir l\'ordre?',
+    ogTitle: 'Limite de Memoire',
+    ogDesc: 'J\'ai atteint le Level __ dans Limite de Memoire! Et vous?',
+    twitterTitle: 'Limite de Memoire',
+    twitterDesc: 'Combien de niveaux votre cerveau peut-il supporter?',
+    statPlayers: '📊 Total de',
+    statPlayersSuffix: 'joueurs',
+    statAvg: '🧠 Moyenne humaine :',
+    statRecord: '🏆 Record mondial :',
+    statElite: '🔥 Seulement',
+    statEliteSuffix: 'ont depasse le Level 20',
+    startBtn: 'Commencer le Defi',
+    leaderboardBtn: '🏆 Classement',
+    personalBtn: '📈 Mon Record',
+    seqLength: 'Sequence',
+    scoreLabel: 'Score :',
+    watching: 'Observez la sequence...',
+    yourTurn: 'A vous !',
+    correct: 'Correct !',
+    speedBonus: 'Bonus vitesse +__ !',
+    perfect: 'Parfait !',
+    newRecord: '🎉 Nouveau Record !',
+    namePlaceholder: 'Entrez votre pseudo',
+    submitBtn: 'Envoyer',
+    copyBtn: '📋 Copier',
+    downloadBtn: '📥 Telecharger',
+    retryBtn: 'Rejouer',
+    lbTitle: '🏆 Classement Mondial',
+    lbLoading: 'Chargement...',
+    lbEmpty: 'Aucun record',
+    lbFail: 'Echec du chargement',
+    uploaded: '✅ Envoye au classement !',
+    uploadFail: 'Echec de l\'envoi, reessayez',
+    copied: '✅ Copie',
+    anonName: 'Joueur Anonyme',
+    pbAlert: 'Record personnel : Level __\nRang : __ (__)',
+    agePrefix: 'Votre memoire equivaut a',
+    detailSeqLen: 'Sequence finale :',
+    detailScore: 'Score total :',
+    detailRank: 'Rang :',
+    detailPB: 'Record perso :',
+    pbLabel: '🏆 Record perso : Level __',
+    pbLabelNew: '🏆 Record perso : Level __ (NEW!)',
+    shareText: '🧠 Limite de Memoire\nJ\'ai atteint le Level __ ! Rang : __ (__)\nEt vous, combien de niveaux?\nhttps://yuchenchen-debug.github.io/memory-limit/',
+    shareImgTitle: '🧠 Limite de Memoire',
+    shareImgSub: 'Memory Limit Challenge',
+    shareImgMyMemory: 'Ma Memoire',
+    shareImgAge: 'Memoire equivalente a __',
+    shareImgCTA: 'Combien de niveaux survivrez-vous?',
+    moreGames: '🎮 Plus de Defis',
+    gameMs: 'Milliseconde',
+    gameMsHook: 'Seulement 0.01% obtiennent SSS',
+    gameColor: 'Test de Couleurs',
+    gameColorHook: 'Seulement 2.1% passent le Level 25',
+    gameReaction: 'Test de Reaction',
+    gameReactionHook: 'Plus rapide que 273ms ?',
+    taunts: {
+      2: ['Meme un poisson rouge ferait mieux, mon cher', 'C\'est le niveau maternelle... charmant'],
+      5: ['Ah, la memoire du commun des mortels', 'Le manuel dit 7±2. Vous etes... dans le manuel. Quel exploit.'],
+      8: ['Pas mal, pas mal... pour un debut', 'Votre hippocampe fait un effort louable'],
+      11: ['Palais de la memoire ? Comme c\'est... studieux', 'Memoire de travail superieure. On se la joue ?'],
+      15: ['Surhumain ! C\'est presque... elegant', 'Vous trichez ou c\'est du talent brut ?'],
+      20: ['Scientifiquement inexplicable. Fascinant.', 'Votre cerveau defie toute logique. Bravo ?'],
+      25: ['Le CNRS a ete prevenu. Preparez-vous.', 'Veuillez leguer votre cerveau a la science. Merci.']
+    },
+    ranks: {
+      sss: 'Top 0.01%', ss: 'Top 0.1%', s: 'Top 1%', a: 'Top 5%', b: 'Top 20%', c: 'Top 50%', d: 'Top 75%', f: 'Consultez peut-etre un medecin'
+    },
+    ages: {
+      25: 'Cerveau d\'Einstein (donne)',
+      20: 'Champion de memoire, 25 ans',
+      15: 'Performance maximale, 22 ans',
+      11: 'Etudiant, 20 ans',
+      8: 'Employe de bureau, 30 ans',
+      5: 'Age moyen, 45 ans',
+      3: 'Senior, 65 ans',
+      0: 'Poisson rouge 🐟 (memoire de 3 sec)'
+    }
+  },
+  'th': {
+    title: '🧠 ขีดจำกัดความจำ',
+    subtitle: 'Memory Limit Challenge',
+    metaTitle: 'ขีดจำกัดความจำ — คุณจำได้กี่ด่าน?',
+    metaDesc: 'ขีดจำกัดความจำ: ช่องจะสว่างขึ้นตามลำดับ คุณจำได้ไหม?',
+    ogTitle: 'ขีดจำกัดความจำ Memory Limit',
+    ogDesc: 'ฉันไปถึง Level __ แล้ว! คุณจำได้กี่ด่าน?',
+    twitterTitle: 'ขีดจำกัดความจำ',
+    twitterDesc: 'สมองของคุณจำได้กี่ด่าน?',
+    statPlayers: '📊 ทั้งหมด',
+    statPlayersSuffix: 'คนท้าทาย',
+    statAvg: '🧠 คนทั่วไปเฉลี่ย:',
+    statRecord: '🏆 สถิติโลก:',
+    statElite: '🔥 แค่',
+    statEliteSuffix: 'ผ่าน Level 20',
+    startBtn: 'เริ่มท้าทาย',
+    leaderboardBtn: '🏆 อันดับ',
+    personalBtn: '📈 สถิติส่วนตัว',
+    seqLength: 'ลำดับ',
+    scoreLabel: 'คะแนน:',
+    watching: 'ดูลำดับ...',
+    yourTurn: 'ตาคุณ!',
+    correct: 'ถูกต้อง!',
+    speedBonus: 'โบนัสความเร็ว +__!',
+    perfect: 'เพอร์เฟกต์!',
+    newRecord: '🎉 สถิติใหม่!',
+    namePlaceholder: 'ใส่ชื่อเล่น',
+    submitBtn: 'ส่ง',
+    copyBtn: '📋 คัดลอก',
+    downloadBtn: '📥 ดาวน์โหลด',
+    retryBtn: 'เล่นอีกครั้ง',
+    lbTitle: '🏆 อันดับโลก',
+    lbLoading: 'กำลังโหลด...',
+    lbEmpty: 'ยังไม่มีสถิติ',
+    lbFail: 'โหลดล้มเหลว',
+    uploaded: '✅ อัพโหลดแล้ว!',
+    uploadFail: 'อัพโหลดล้มเหลว ลองอีกครั้ง',
+    copied: '✅ คัดลอกแล้ว',
+    anonName: 'ผู้เล่นนิรนาม',
+    pbAlert: 'สถิติส่วนตัว: Level __\nอันดับ: __ (__)',
+    agePrefix: 'ความจำของคุณเทียบเท่ากับ',
+    detailSeqLen: 'ลำดับสุดท้าย:',
+    detailScore: 'คะแนนรวม:',
+    detailRank: 'อันดับ:',
+    detailPB: 'สถิติส่วนตัว:',
+    pbLabel: '🏆 สถิติส่วนตัว: Level __',
+    pbLabelNew: '🏆 สถิติส่วนตัว: Level __ (NEW!)',
+    shareText: '🧠 ขีดจำกัดความจำ\nฉันไปถึง Level __! อันดับ: __ (__)\nคุณจำได้กี่ด่าน?\nhttps://yuchenchen-debug.github.io/memory-limit/',
+    shareImgTitle: '🧠 ขีดจำกัดความจำ',
+    shareImgSub: 'Memory Limit Challenge',
+    shareImgMyMemory: 'ความจำของฉัน',
+    shareImgAge: 'ความจำเทียบเท่า __',
+    shareImgCTA: 'คุณจำได้กี่ด่าน?',
+    moreGames: '🎮 ท้าทายเพิ่มเติม',
+    gameMs: 'มิลลิวินาที',
+    gameMsHook: 'แค่ 0.01% ได้ SSS',
+    gameColor: 'ทดสอบการมองสี',
+    gameColorHook: 'แค่ 2.1% ผ่าน Level 25',
+    gameReaction: 'ทดสอบปฏิกิริยา',
+    gameReactionHook: 'คุณเร็วกว่า 273ms ไหม?',
+    taunts: {
+      2: ['อุ๊ย~ ปลาทองยังจำได้นะจ๊ะ 555', 'อนุบาลเลยจ้า น่ารักอ่ะ~'],
+      5: ['ก็ดีนะ... สำหรับคนธรรมดา 555', 'ตำราเขียนว่า 7±2 คุณก็อยู่ตรงนั้นแหละ~'],
+      8: ['โอ้โห ไม่เลวเลยนะเนี่ย!', 'สมองเริ่มตื่นแล้ว 5555'],
+      11: ['ใช้พระราชวังแห่งความจำหรอ?! เก่งว่ะ~', 'ความจำระยะสั้นแกร่งมาก!'],
+      15: ['ซูเปอร์ฮิวแมน!! 555', 'โกงหรือเก่งจริง บอกมา~'],
+      20: ['ไม่มีทาง!!! วิทยาศาสตร์อธิบายไม่ได้!', 'สมองไม่ใช่มนุษย์ปกติแน่ๆ!'],
+      25: ['แจ้งศูนย์วิจัยสมองแล้ว 5555', 'บริจาคสมองให้วิทยาศาสตร์ด้วยนะ~']
+    },
+    ranks: {
+      sss: 'อันดับ 0.01% แรก', ss: 'อันดับ 0.1% แรก', s: 'อันดับ 1% แรก', a: 'อันดับ 5% แรก', b: 'อันดับ 20% แรก', c: 'อันดับ 50% แรก', d: 'อันดับ 75% แรก', f: 'อาจต้องไปหาหมอนะจ๊ะ~'
+    },
+    ages: {
+      25: 'สมองไอน์สไตน์ (บริจาคแล้ว)',
+      20: 'แชมป์ความจำ 25 ปี',
+      15: 'วัยรุ่งเรือง 22 ปี',
+      11: 'นักศึกษา 20 ปี',
+      8: 'พนักงาน 30 ปี',
+      5: 'วัยกลางคน 45 ปี',
+      3: 'ผู้สูงอายุ 65 ปี',
+      0: 'ปลาทอง 🐟 (จำได้ 3 วินาที)'
+    }
+  },
+  'id': {
+    title: '🧠 Batas Memori',
+    subtitle: 'Memory Limit Challenge',
+    metaTitle: 'Batas Memori — Sampai level berapa kamu kuat?',
+    metaDesc: 'Batas Memori: Kotak menyala berurutan. Bisa ingat urutannya?',
+    ogTitle: 'Batas Memori Memory Limit',
+    ogDesc: 'Gue sampe Level __ di Batas Memori! Lu bisa sampe mana?',
+    twitterTitle: 'Batas Memori',
+    twitterDesc: 'Otak lu kuat sampe level berapa?',
+    statPlayers: '📊 Total',
+    statPlayersSuffix: 'pemain',
+    statAvg: '🧠 Rata-rata manusia:',
+    statRecord: '🏆 Rekor dunia:',
+    statElite: '🔥 Cuma',
+    statEliteSuffix: 'tembus Level 20',
+    startBtn: 'Mulai Tantangan',
+    leaderboardBtn: '🏆 Peringkat',
+    personalBtn: '📈 Rekor Gue',
+    seqLength: 'Urutan',
+    scoreLabel: 'Skor:',
+    watching: 'Perhatikan urutannya...',
+    yourTurn: 'Giliran kamu!',
+    correct: 'Betul!',
+    speedBonus: 'Bonus kecepatan +__!',
+    perfect: 'Sempurna!',
+    newRecord: '🎉 Rekor Baru!',
+    namePlaceholder: 'Masukin nama panggilan',
+    submitBtn: 'Kirim',
+    copyBtn: '📋 Salin',
+    downloadBtn: '📥 Unduh',
+    retryBtn: 'Coba Lagi',
+    lbTitle: '🏆 Peringkat Global',
+    lbLoading: 'Memuat...',
+    lbEmpty: 'Belum ada rekor',
+    lbFail: 'Gagal memuat',
+    uploaded: '✅ Udah masuk peringkat!',
+    uploadFail: 'Gagal upload, coba lagi',
+    copied: '✅ Udah disalin',
+    anonName: 'Pemain Anonim',
+    pbAlert: 'Rekor pribadi: Level __\nRank: __ (__)',
+    agePrefix: 'Memori kamu setara dengan',
+    detailSeqLen: 'Urutan akhir:',
+    detailScore: 'Total skor:',
+    detailRank: 'Rank:',
+    detailPB: 'Rekor pribadi:',
+    pbLabel: '🏆 Rekor pribadi: Level __',
+    pbLabelNew: '🏆 Rekor pribadi: Level __ (NEW!)',
+    shareText: '🧠 Batas Memori\nGue sampe Level __! Rank: __ (__)\nLu bisa sampe mana?\nhttps://yuchenchen-debug.github.io/memory-limit/',
+    shareImgTitle: '🧠 Batas Memori',
+    shareImgSub: 'Memory Limit Challenge',
+    shareImgMyMemory: 'Memori Gue',
+    shareImgAge: 'Memori setara __',
+    shareImgCTA: 'Lu bisa sampe level berapa?',
+    moreGames: '🎮 Tantangan Lain',
+    gameMs: 'Milidetik',
+    gameMsHook: 'Cuma 0.01% dapet SSS',
+    gameColor: 'Tes Warna',
+    gameColorHook: 'Cuma 2.1% lewat Level 25',
+    gameReaction: 'Tes Reaksi',
+    gameReactionHook: 'Lebih cepet dari 273ms?',
+    taunts: {
+      2: ['Ikan mas aja bisa wkwkwk', 'Ini level TK bro wkwk'],
+      5: ['Yah manusia biasa sih wkwk', 'Buku bilang 7±2, lu pas banget di situ wkwk'],
+      8: ['Eh lumayan juga lu! Gak nyangka', 'Hippocampus lu kerja juga ternyata wkwk'],
+      11: ['Lu pake istana memori ya? Curiga nih wkwk', 'Working memory lu di atas rata-rata bro'],
+      15: ['ANJIR SUPERHUMAN!! wkwkwk', 'Lu ngecheat apa emang jenius sih?'],
+      20: ['GAK MUNGKIN BGST wkwkwkwk', 'Otak lu bukan manusia normal ini mah'],
+      25: ['Udah dilaporin ke lab neuroscience wkwk', 'Tolong donasiin otak lu buat sains 🙏']
+    },
+    ranks: {
+      sss: 'Top 0.01%', ss: 'Top 0.1%', s: 'Top 1%', a: 'Top 5%', b: 'Top 20%', c: 'Top 50%', d: 'Top 75%', f: 'Mungkin perlu ke dokter wkwk'
+    },
+    ages: {
+      25: 'Otaknya Einstein (udah didonasiin)',
+      20: 'Juara memori, 25 tahun',
+      15: 'Puncak performa, 22 tahun',
+      11: 'Mahasiswa, 20 tahun',
+      8: 'Pekerja kantoran, 30 tahun',
+      5: 'Paruh baya, 45 tahun',
+      3: 'Lansia, 65 tahun',
+      0: 'Ikan mas 🐟 (memori 3 detik)'
+    }
+  },
+  'vi': {
+    title: '🧠 Gioi Han Tri Nho',
+    subtitle: 'Memory Limit Challenge',
+    metaTitle: 'Gioi Han Tri Nho — Ban nho duoc bao nhieu level?',
+    metaDesc: 'Gioi Han Tri Nho: O sang len theo thu tu. Ban co nho duoc khong?',
+    ogTitle: 'Gioi Han Tri Nho Memory Limit',
+    ogDesc: 'Toi dat Level __ trong Gioi Han Tri Nho! Ban nho duoc bao nhieu?',
+    twitterTitle: 'Gioi Han Tri Nho',
+    twitterDesc: 'Nao ban chiu duoc bao nhieu level?',
+    statPlayers: '📊 Tong cong',
+    statPlayersSuffix: 'nguoi choi',
+    statAvg: '🧠 Trung binh con nguoi:',
+    statRecord: '🏆 Ky luc the gioi:',
+    statElite: '🔥 Chi',
+    statEliteSuffix: 'vuot Level 20',
+    startBtn: 'Bat Dau Thach Thuc',
+    leaderboardBtn: '🏆 Bang Xep Hang',
+    personalBtn: '📈 Ky Luc Cua Toi',
+    seqLength: 'Chuoi',
+    scoreLabel: 'Diem:',
+    watching: 'Quan sat chuoi...',
+    yourTurn: 'Luot cua ban!',
+    correct: 'Chinh xac!',
+    speedBonus: 'Thuong toc do +__!',
+    perfect: 'Hoan hao!',
+    newRecord: '🎉 Ky Luc Moi!',
+    namePlaceholder: 'Nhap biet danh',
+    submitBtn: 'Gui',
+    copyBtn: '📋 Sao chep',
+    downloadBtn: '📥 Tai xuong',
+    retryBtn: 'Choi Lai',
+    lbTitle: '🏆 Bang Xep Hang Toan Cau',
+    lbLoading: 'Dang tai...',
+    lbEmpty: 'Chua co ky luc nao',
+    lbFail: 'Tai that bai',
+    uploaded: '✅ Da dang len bang xep hang!',
+    uploadFail: 'Dang that bai, thu lai',
+    copied: '✅ Da sao chep',
+    anonName: 'Nguoi Choi An Danh',
+    pbAlert: 'Ky luc ca nhan: Level __\nHang: __ (__)',
+    agePrefix: 'Tri nho cua ban tuong duong voi',
+    detailSeqLen: 'Chuoi cuoi:',
+    detailScore: 'Tong diem:',
+    detailRank: 'Hang:',
+    detailPB: 'Ky luc ca nhan:',
+    pbLabel: '🏆 Ky luc ca nhan: Level __',
+    pbLabelNew: '🏆 Ky luc ca nhan: Level __ (NEW!)',
+    shareText: '🧠 Gioi Han Tri Nho\nToi dat Level __! Hang: __ (__)\nBan nho duoc bao nhieu?\nhttps://yuchenchen-debug.github.io/memory-limit/',
+    shareImgTitle: '🧠 Gioi Han Tri Nho',
+    shareImgSub: 'Memory Limit Challenge',
+    shareImgMyMemory: 'Tri Nho Cua Toi',
+    shareImgAge: 'Tri nho tuong duong __',
+    shareImgCTA: 'Ban nho duoc bao nhieu level?',
+    moreGames: '🎮 Thach Thuc Khac',
+    gameMs: 'Phan Nghin Giay',
+    gameMsHook: 'Chi 0.01% dat SSS',
+    gameColor: 'Kiem Tra Sac Giac',
+    gameColorHook: 'Chi 2.1% qua Level 25',
+    gameReaction: 'Kiem Tra Phan Xa',
+    gameReactionHook: 'Ban nhanh hon 273ms khong?',
+    taunts: {
+      2: ['Oi gioi oi... ca vang con nho duoc ma ban oi 🤣', 'Level mau giao luon a nhi~ cute ghe'],
+      5: ['Tri nho nguoi binh thuong thoi ha 😏', 'Sach ghi 7±2, ban dung o do luon ha ha'],
+      8: ['Oi ngon lành ha! Cung duoc do nhen~', 'Hippocampus bat dau hoat dong roi do!'],
+      11: ['Xai cung dien tri nho ha?! Pro vay~', 'Bo nho lam viec tren muc binh thuong roi!'],
+      15: ['SIEU NHAN luon roi!! 🦸', 'Gian hay la thien tai vay troi?!'],
+      20: ['KHONG THE NAO!!! Khoa hoc khong giai thich noi!', 'Nao ban khong phai nguoi binh thuong dau!'],
+      25: ['Da bao cho trung tam nghien cuu nao roi 🤣', 'Cho xin cai nao de nghien cuu nha~ 🧠']
+    },
+    ranks: {
+      sss: 'Top 0.01%', ss: 'Top 0.1%', s: 'Top 1%', a: 'Top 5%', b: 'Top 20%', c: 'Top 50%', d: 'Top 75%', f: 'Co le ban nen di kham bac si~'
+    },
+    ages: {
+      25: 'Nao Einstein (da hien tang)',
+      20: 'Nha vo dich tri nho, 25 tuoi',
+      15: 'Dinh cao, 22 tuoi',
+      11: 'Sinh vien, 20 tuoi',
+      8: 'Nhan vien van phong, 30 tuoi',
+      5: 'Trung nien, 45 tuoi',
+      3: 'Nguoi cao tuoi, 65 tuoi',
+      0: 'Ca vang 🐟 (tri nho 3 giay)'
+    }
+  }
+};
+
+let curLang = 'zh-TW';
+
+function detectLang() {
+  const saved = localStorage.getItem('ml-lang');
+  if (saved && LANG[saved]) return saved;
+  const nav = (navigator.language || navigator.userLanguage || '').toLowerCase();
+  if (nav.startsWith('zh-tw') || nav === 'zh-hant' || nav.startsWith('zh-hk')) return 'zh-TW';
+  if (nav.startsWith('zh')) return 'zh-TW';
+  if (nav.startsWith('ja')) return 'ja';
+  if (nav.startsWith('ko')) return 'ko';
+  if (nav.startsWith('es')) return 'es';
+  if (nav.startsWith('pt')) return 'pt';
+  if (nav.startsWith('de')) return 'de';
+  if (nav.startsWith('fr')) return 'fr';
+  if (nav.startsWith('th')) return 'th';
+  if (nav.startsWith('id') || nav.startsWith('ms')) return 'id';
+  if (nav.startsWith('vi')) return 'vi';
+  if (nav.startsWith('en')) return 'en';
+  return 'zh-TW';
+}
+
+function t(key) {
+  return LANG[curLang][key] || LANG['zh-TW'][key] || key;
+}
+
+function changeLang(lang) {
+  if (!LANG[lang]) return;
+  curLang = lang;
+  localStorage.setItem('ml-lang', lang);
+  document.getElementById('langSelect').value = lang;
+  applyLang();
+}
+
+function applyLang() {
+  const L = LANG[curLang];
+  // Update HTML lang attribute
+  const langMap = {'zh-TW':'zh-Hant','en':'en','ja':'ja','ko':'ko','es':'es','pt':'pt','de':'de','fr':'fr','th':'th','id':'id','vi':'vi'};
+  document.documentElement.lang = langMap[curLang] || curLang;
+
+  // Meta tags
+  document.title = L.metaTitle;
+  document.querySelector('meta[name="description"]').content = L.metaDesc;
+  document.querySelector('meta[property="og:title"]').content = L.ogTitle;
+  document.querySelector('meta[property="og:description"]').content = L.ogDesc;
+  document.querySelector('meta[name="twitter:title"]').content = L.twitterTitle;
+  document.querySelector('meta[name="twitter:description"]').content = L.twitterDesc;
+
+  // All data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (L[key]) el.textContent = L[key];
+  });
+
+  // Placeholder
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (L[key]) el.placeholder = L[key];
+  });
+
+  // More games section
+  const moreTitle = document.getElementById('moreGamesTitle');
+  if (moreTitle) moreTitle.textContent = L.moreGames;
+  const gameNames = document.querySelectorAll('.game-card .name');
+  const gameHooks = document.querySelectorAll('.game-card .hook');
+  if (gameNames[0]) gameNames[0].textContent = L.gameMs;
+  if (gameNames[1]) gameNames[1].textContent = L.gameColor;
+  if (gameNames[2]) gameNames[2].textContent = L.gameReaction;
+  if (gameHooks[0]) gameHooks[0].textContent = L.gameMsHook;
+  if (gameHooks[1]) gameHooks[1].textContent = L.gameColorHook;
+  if (gameHooks[2]) gameHooks[2].textContent = L.gameReactionHook;
+}
+
 // ---- Firebase ----
 firebase.initializeApp({
   apiKey:"AIzaSyC977FBxgGqVCrEjYc_J5JlefMWNCgffg0",
@@ -244,17 +1256,9 @@ function buildGrid() {
 }
 
 // ---- Taunts ----
-const taunts = {
-  2: ["連金魚都記得住", "這是幼稚園等級"],
-  5: ["普通人類記憶力", "心理學教科書說 7±2 是極限"],
-  8: ["不錯，超越平均", "你的海馬迴還行"],
-  11: ["記憶宮殿使用者？", "你的工作記憶超標"],
-  15: ["超人級記憶", "你是不是用了什麼技巧"],
-  20: ["這不科學", "你的大腦不是正常人類的"],
-  25: ["已通報腦神經研究中心", "請捐獻大腦供科學研究"]
-};
-
 function getTaunt(lv) {
+  const L = LANG[curLang];
+  const taunts = L.taunts;
   let pool;
   if (lv >= 25) pool = taunts[25];
   else if (lv >= 20) pool = taunts[20];
@@ -268,26 +1272,30 @@ function getTaunt(lv) {
 
 // ---- Ranking ----
 function getRank(lv) {
-  if (lv >= 25) return { rank: 'SSS', cls: 'sss', pct: '前 0.01%' };
-  if (lv >= 20) return { rank: 'SS', cls: 'ss', pct: '前 0.1%' };
-  if (lv >= 15) return { rank: 'S', cls: 's', pct: '前 1%' };
-  if (lv >= 11) return { rank: 'A', cls: 'a', pct: '前 5%' };
-  if (lv >= 8) return { rank: 'B', cls: 'b', pct: '前 20%' };
-  if (lv >= 5) return { rank: 'C', cls: 'c', pct: '前 50%' };
-  if (lv >= 3) return { rank: 'D', cls: 'd', pct: '前 75%' };
-  return { rank: 'F', cls: 'f', pct: '你可能需要去看醫生' };
+  const L = LANG[curLang];
+  const r = L.ranks;
+  if (lv >= 25) return { rank: 'SSS', cls: 'sss', pct: r.sss };
+  if (lv >= 20) return { rank: 'SS', cls: 'ss', pct: r.ss };
+  if (lv >= 15) return { rank: 'S', cls: 's', pct: r.s };
+  if (lv >= 11) return { rank: 'A', cls: 'a', pct: r.a };
+  if (lv >= 8) return { rank: 'B', cls: 'b', pct: r.b };
+  if (lv >= 5) return { rank: 'C', cls: 'c', pct: r.c };
+  if (lv >= 3) return { rank: 'D', cls: 'd', pct: r.d };
+  return { rank: 'F', cls: 'f', pct: r.f };
 }
 
 // ---- Age comparison ----
 function getAge(lv) {
-  if (lv >= 25) return '愛因斯坦的大腦（已捐贈）';
-  if (lv >= 20) return '記憶冠軍 25 歲';
-  if (lv >= 15) return '巔峰期 22 歲';
-  if (lv >= 11) return '大學生 20 歲';
-  if (lv >= 8) return '上班族 30 歲';
-  if (lv >= 5) return '中年人 45 歲';
-  if (lv >= 3) return '65 歲長者';
-  return '金魚 🐟（3 秒記憶）';
+  const L = LANG[curLang];
+  const a = L.ages;
+  if (lv >= 25) return a[25];
+  if (lv >= 20) return a[20];
+  if (lv >= 15) return a[15];
+  if (lv >= 11) return a[11];
+  if (lv >= 8) return a[8];
+  if (lv >= 5) return a[5];
+  if (lv >= 3) return a[3];
+  return a[0];
 }
 
 // ---- Milestones ----
@@ -325,7 +1333,7 @@ function nextRound() {
   tapTimes = [];
   gameActive = false;
   showingSequence = true;
-  document.getElementById('status').textContent = '觀察序列...';
+  document.getElementById('status').textContent = t('watching');
 
   // Generate new sequence
   sequence = [];
@@ -353,7 +1361,7 @@ function nextRound() {
     showingSequence = false;
     gameActive = true;
     roundStartTime = performance.now();
-    document.getElementById('status').textContent = `輪到你了！(0/${level})`;
+    document.getElementById('status').textContent = `${t('yourTurn')} (0/${level})`;
   }, delay + sequence.length * 500 + 200);
 }
 
@@ -370,7 +1378,7 @@ function handleTap(idx) {
     setTimeout(() => tile.classList.remove('correct', 'pulse'), 250);
 
     playerIndex++;
-    document.getElementById('status').textContent = `正確！(${playerIndex}/${level})`;
+    document.getElementById('status').textContent = `${t('correct')} (${playerIndex}/${level})`;
 
     if (playerIndex === sequence.length) {
       // Round complete
@@ -381,7 +1389,7 @@ function handleTap(idx) {
       score += level * 10 + speedBonus;
       level++;
       updateHUD();
-      document.getElementById('status').textContent = speedBonus > 0 ? `速度加分 +${speedBonus}！` : '完美！';
+      document.getElementById('status').textContent = speedBonus > 0 ? t('speedBonus').replace('__', speedBonus) : t('perfect');
       setTimeout(() => nextRound(), 800);
     }
   } else {
@@ -415,16 +1423,15 @@ function endGame() {
   document.getElementById('resultLevel').textContent = finalLevel;
   document.getElementById('resultMsg').textContent = getTaunt(finalLevel);
   document.getElementById('resultPercentile').textContent = r.pct;
-  document.getElementById('resultAge').innerHTML = `你的記憶力相當於 <em>${getAge(finalLevel)}</em>`;
+  document.getElementById('resultAge').innerHTML = `${t('agePrefix')} <em>${getAge(finalLevel)}</em>`;
 
-  const pbText = isNewPB ? `🏆 個人最佳: Level ${personalBest} (NEW!)` : `🏆 個人最佳: Level ${personalBest}`;
   document.getElementById('pbBadge').style.display = isNewPB ? 'block' : 'none';
 
   document.getElementById('resultDetail').innerHTML = `
-    <strong>最終序列長度:</strong> ${finalLevel}<br>
-    <strong>總分:</strong> ${score}<br>
-    <strong>評級:</strong> ${r.rank} (${r.pct})<br>
-    <strong>個人最佳:</strong> Level ${personalBest}
+    <strong>${t('detailSeqLen')}</strong> ${finalLevel}<br>
+    <strong>${t('detailScore')}</strong> ${score}<br>
+    <strong>${t('detailRank')}</strong> ${r.rank} (${r.pct})<br>
+    <strong>${t('detailPB')}</strong> Level ${personalBest}
   `;
 
   // Restore name if saved
@@ -441,7 +1448,7 @@ function endGame() {
 
 // ---- Score submission ----
 function submitScore() {
-  const name = document.getElementById('playerName').value.trim() || '匿名玩家';
+  const name = document.getElementById('playerName').value.trim() || t('anonName');
   localStorage.setItem('ml-name', name);
   const finalLevel = parseInt(document.getElementById('resultLevel').textContent);
   scoresRef.push({
@@ -451,22 +1458,22 @@ function submitScore() {
     rank: getRank(finalLevel).rank,
     ts: Date.now()
   }).then(() => {
-    document.getElementById('nameInput').innerHTML = '<div style="color:#00ff88;font-size:.85rem">✅ 已上傳排行榜！</div>';
+    document.getElementById('nameInput').innerHTML = `<div style="color:#00ff88;font-size:.85rem">${t('uploaded')}</div>`;
   }).catch(() => {
-    document.getElementById('nameInput').innerHTML = '<div style="color:#ff2d55;font-size:.85rem">上傳失敗，請重試</div>';
+    document.getElementById('nameInput').innerHTML = `<div style="color:#ff2d55;font-size:.85rem">${t('uploadFail')}</div>`;
   });
 }
 
 // ---- Leaderboard ----
 function showLeaderboard() {
   document.getElementById('lbModal').classList.add('active');
-  document.getElementById('lbList').innerHTML = '<div style="text-align:center;color:#888;padding:20px">載入中...</div>';
+  document.getElementById('lbList').innerHTML = `<div style="text-align:center;color:#888;padding:20px">${t('lbLoading')}</div>`;
   scoresRef.orderByChild('level').limitToLast(20).once('value').then(snap => {
     const entries = [];
     snap.forEach(c => entries.push(c.val()));
     entries.sort((a, b) => b.level - a.level || b.score - a.score);
     if (entries.length === 0) {
-      document.getElementById('lbList').innerHTML = '<div style="text-align:center;color:#888;padding:20px">還沒有紀錄</div>';
+      document.getElementById('lbList').innerHTML = `<div style="text-align:center;color:#888;padding:20px">${t('lbEmpty')}</div>`;
       return;
     }
     document.getElementById('lbList').innerHTML = entries.map((e, i) => `
@@ -477,7 +1484,7 @@ function showLeaderboard() {
       </div>
     `).join('');
   }).catch(() => {
-    document.getElementById('lbList').innerHTML = '<div style="text-align:center;color:#888;padding:20px">載入失敗</div>';
+    document.getElementById('lbList').innerHTML = `<div style="text-align:center;color:#888;padding:20px">${t('lbFail')}</div>`;
   });
 }
 function closeLB() { document.getElementById('lbModal').classList.remove('active'); }
@@ -485,14 +1492,16 @@ function escHTML(s) { const d = document.createElement('div'); d.textContent = s
 
 // ---- PB display ----
 function showPB() {
-  alert(`個人最佳紀錄: Level ${personalBest}\n評級: ${getRank(personalBest).rank} (${getRank(personalBest).pct})`);
+  const r = getRank(personalBest);
+  const msg = t('pbAlert').replace('__', personalBest).replace('__', r.rank).replace('__', r.pct);
+  alert(msg);
 }
 
 // ---- Share functions ----
 function getShareText() {
   const lv = document.getElementById('resultLevel').textContent;
   const r = getRank(parseInt(lv));
-  return `🧠 記憶極限 Memory Limit\n我達到了 Level ${lv}！評級: ${r.rank} (${r.pct})\n你的記憶力能撐到第幾關？\nhttps://yuchenchen-debug.github.io/memory-limit/`;
+  return t('shareText').replace('__', lv).replace('__', r.rank).replace('__', r.pct);
 }
 
 function shareLINE() {
@@ -506,8 +1515,8 @@ function shareX() {
 function shareCopy() {
   navigator.clipboard.writeText(getShareText()).then(() => {
     const btn = event.target;
-    btn.textContent = '✅ 已複製';
-    setTimeout(() => btn.textContent = '📋 複製', 2000);
+    btn.textContent = t('copied');
+    setTimeout(() => btn.textContent = t('copyBtn'), 2000);
   });
 }
 
@@ -534,11 +1543,11 @@ function generateShareImage() {
   ctx.fillStyle = '#a855f7';
   ctx.font = 'bold 64px -apple-system, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('🧠 記憶極限', W / 2, 140);
+  ctx.fillText(t('shareImgTitle'), W / 2, 140);
 
   ctx.fillStyle = '#666';
   ctx.font = '32px -apple-system, sans-serif';
-  ctx.fillText('Memory Limit Challenge', W / 2, 200);
+  ctx.fillText(t('shareImgSub'), W / 2, 200);
 
   // Level
   const lv = document.getElementById('resultLevel').textContent;
@@ -546,7 +1555,7 @@ function generateShareImage() {
 
   ctx.fillStyle = '#e0e0e0';
   ctx.font = 'bold 48px -apple-system, sans-serif';
-  ctx.fillText('我的記憶力', W / 2, 340);
+  ctx.fillText(t('shareImgMyMemory'), W / 2, 340);
 
   // Rank
   const rankColors = { sss: '#ffd700', ss: '#ff6b6b', s: '#ffd700', a: '#a855f7', b: '#6366f1', c: '#3b82f6', d: '#888', f: '#ff2d55' };
@@ -565,12 +1574,12 @@ function generateShareImage() {
   // Age
   ctx.fillStyle = '#aaa';
   ctx.font = '30px -apple-system, sans-serif';
-  ctx.fillText(`記憶力相當於 ${getAge(parseInt(lv))}`, W / 2, 800);
+  ctx.fillText(t('shareImgAge').replace('__', getAge(parseInt(lv))), W / 2, 800);
 
   // CTA
   ctx.fillStyle = '#a855f7';
   ctx.font = 'bold 34px -apple-system, sans-serif';
-  ctx.fillText('你的記憶力能撐到第幾關？', W / 2, 920);
+  ctx.fillText(t('shareImgCTA'), W / 2, 920);
 
   ctx.fillStyle = '#666';
   ctx.font = '26px -apple-system, sans-serif';
@@ -599,6 +1608,11 @@ function shareDL() {
   link.click();
 }
 
+// ---- Init language ----
+curLang = detectLang();
+document.getElementById('langSelect').value = curLang;
+applyLang();
+
 // ---- PWA registration ----
 if ('serviceWorker' in navigator) {
   // Minimal — no SW file needed for manifest link
@@ -622,7 +1636,7 @@ try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
 .game-card .hook{font-size:11px;color:#666;line-height:1.3}
 </style>
 <div class="more-games">
-  <h3>🎮 更多挑戰</h3>
+  <h3 id="moreGamesTitle">🎮 更多挑戰</h3>
   <div class="more-games-row">
     <a class="game-card" href="https://yuchenchen-debug.github.io/millisecond-challenge/">
       <span class="emoji">⏱️</span>
